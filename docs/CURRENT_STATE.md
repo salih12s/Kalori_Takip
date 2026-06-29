@@ -2,117 +2,95 @@
 
 ## Phase
 
-Phase 2 - Profile and goals backend is implemented.
-
-## Checkpoint completed before Phase 2
-
-- Initialized Git because the project was not a Git repository.
-- Tightened `.gitignore` for local secrets and generated files.
-- Confirmed `.env`, `node_modules`, `dist`, and build output are ignored.
-- Fixed obvious top-level docs filename/content drift.
-- Confirmed `backend/.env` remains untracked and ignored.
-- Ran backend build and Prisma Client generation.
-- Verified health and auth endpoints before starting Phase 2.
-- Created Git commit:
-  - `9d3e91d feat: complete phase 0 setup and phase 1 auth`
+Phase 3 - Nutrition backend is implemented.
 
 ## Completed work
 
-- Implemented protected profile backend endpoints:
-  - `GET /api/profile/me`
-  - `PUT /api/profile/me`
-- Implemented protected goals backend endpoints:
-  - `GET /api/goals/me`
-  - `POST /api/goals`
-  - `PUT /api/goals/:goalId`
-- Added profile module with routes, controller, service, repository, validation, types, and mapper.
-- Added goals module with routes, controller, service, repository, validation, types, and mapper.
-- Mounted profile and goals routes in `backend/src/app.ts`.
-- `GET /api/profile/me` creates a minimal default profile when missing.
-- `GET /api/goals/me` returns `null` when no active goal exists. This is safer than inventing default nutrition or body goals because goals are personal and should be explicitly set.
-- Creating a goal deactivates previous active goals for the current user.
-- Updating a goal checks ownership and deactivates other active goals when `isActive` is set to `true`.
-- Added a minimal Prisma schema extension required by the Phase 2 request:
-  - `Profile.bio`
-  - `Profile.gender`
-  - `UserGoal.dailyCarbGoal`
-  - `UserGoal.dailyFatGoal`
-- Created and applied Prisma migration:
-  - `20260629233621_add_profile_goal_fields`
+- Implemented protected nutrition backend endpoints:
+  - `GET /api/foods/search?q=...`
+  - `POST /api/foods`
+  - `GET /api/meals?date=YYYY-MM-DD`
+  - `POST /api/meals/entries`
+  - `DELETE /api/meals/entries/:entryId`
+- Added nutrition module with routes, controller, service, repository, validation, types, and mapper.
+- Mounted nutrition routes in `backend/src/app.ts`.
+- Added shared `normalizeText` utility.
+- Food creation uses current user as `Food.userId` and `source: USER_CREATED`.
+- Food aliases are normalized before storing.
+- Food search checks food name and aliases with case-insensitive search.
+- `GET /api/meals` creates a `DailyLog` and the four meal rows when missing.
+- Food entries store nutrition snapshots:
+  - `foodNameSnapshot`
+  - `calories`
+  - `protein`
+  - `carbs`
+  - `fat`
+- Food entry nutrition uses:
+  - `entryValue = foodValue * (quantity / food.servingSize)`
+- Daily totals are recalculated after entry create/delete to avoid drift.
+- No frontend UI was created or changed.
+- No dashboard, activity, social, leaderboard, external food API, barcode, or AI food recognition work was started.
+
+## Schema note
+
+No Prisma schema change was made in Phase 3.
+
+The request referenced `Food.normalizedName`, `FoodAlias.normalizedAlias`, deleted foods, `createdByUserId`, `fiber`, and `sugar`, but the current schema does not include those columns. To avoid unnecessary schema churn, Phase 3 uses the existing schema:
+
+- `Food.userId` is used as the creator owner field.
+- `Food.name` and `FoodAlias.alias` are searched directly.
+- Aliases are normalized before storage because there is no separate normalized alias column.
+- There is no deleted-food flag in the current schema, so all current food rows are treated as active.
+- `fiber` and `sugar` are not stored because `FoodEntry` has no such snapshot columns.
 
 ## Changed files
 
-- `.gitignore`
-- `docs/CURRENT_STATE.md`
-- Top-level docs files with obvious filename/content drift.
-- `docs/prompts/PHASE_0_SETUP_PROMPT.md`
-- `backend/prisma/schema.prisma`
-- `backend/prisma/migrations/20260629233621_add_profile_goal_fields/migration.sql`
 - `backend/src/app.ts`
-- `backend/src/modules/profiles/profiles.routes.ts`
-- `backend/src/modules/profiles/profiles.controller.ts`
-- `backend/src/modules/profiles/profiles.service.ts`
-- `backend/src/modules/profiles/profiles.repository.ts`
-- `backend/src/modules/profiles/profiles.validation.ts`
-- `backend/src/modules/profiles/profiles.types.ts`
-- `backend/src/modules/profiles/profiles.mapper.ts`
-- `backend/src/modules/goals/goals.routes.ts`
-- `backend/src/modules/goals/goals.controller.ts`
-- `backend/src/modules/goals/goals.service.ts`
-- `backend/src/modules/goals/goals.repository.ts`
-- `backend/src/modules/goals/goals.validation.ts`
-- `backend/src/modules/goals/goals.types.ts`
-- `backend/src/modules/goals/goals.mapper.ts`
+- `backend/src/shared/utils/normalize-text.ts`
+- `backend/src/modules/nutrition/nutrition.routes.ts`
+- `backend/src/modules/nutrition/nutrition.controller.ts`
+- `backend/src/modules/nutrition/nutrition.service.ts`
+- `backend/src/modules/nutrition/nutrition.repository.ts`
+- `backend/src/modules/nutrition/nutrition.validation.ts`
+- `backend/src/modules/nutrition/nutrition.types.ts`
+- `backend/src/modules/nutrition/nutrition.mapper.ts`
+- `docs/CURRENT_STATE.md`
 
 ## Commands run
 
-Checkpoint:
-
 ```bash
-git init
-git check-ignore -v backend/.env backend/node_modules backend/dist frontend/node_modules frontend/dist
-npm run build
-npm run prisma:generate
-git add .
-git commit -m "feat: complete phase 0 setup and phase 1 auth"
-```
-
-Phase 2:
-
-```bash
-npm run prisma:migrate -- --name add_profile_goal_fields
 npm run prisma:generate
 npm run build
+npm run prisma:migrate -- --name nutrition_no_schema_change
 ```
 
 Endpoint tests were run against the compiled backend with PowerShell `Invoke-RestMethod`.
 
 ## Endpoint test results
 
-Checkpoint:
-
 - `GET /api/health`: passed.
 - `POST /api/auth/register`: passed, token returned, `passwordHash` not returned.
-- `POST /api/auth/login`: passed, token returned, `passwordHash` not returned.
-- `GET /api/auth/me`: passed with Bearer token, `passwordHash` not returned.
-
-Phase 2:
-
-- `GET /api/health`: passed.
-- `POST /api/auth/register`: passed, token returned, `passwordHash` not returned.
-- `GET /api/auth/me`: passed with Bearer token, `passwordHash` not returned.
-- `GET /api/profile/me`: passed, default profile created when missing.
-- `PUT /api/profile/me`: passed with `fullName`, `bio`, `gender`, `birthDate`, `heightCm`, `currentWeightKg`, and `privacyLevel`.
-- `GET /api/goals/me`: passed, returned `null` before goal creation.
-- `POST /api/goals`: passed, active goal created with carb and fat goals.
-- `PUT /api/goals/:goalId`: passed, owned goal updated.
+- `GET /api/auth/me`: passed with Bearer token.
+- `POST /api/foods`: passed, created `Yumurta` with `USER_CREATED` source and two aliases.
+- `GET /api/foods/search?q=yumurta`: passed, returned created food.
+- `GET /api/meals?date=2026-06-30`: passed, created missing daily log and meal rows, total calories started at 0.
+- `POST /api/meals/entries`: passed, quantity 2 of a 70-calorie food created a 140-calorie entry.
+- `GET /api/meals?date=2026-06-30` after add: passed, totals increased to 140 calories and 12 protein.
+- `DELETE /api/meals/entries/:entryId`: passed, deleted owned entry and totals returned to 0.
+- `GET /api/meals?date=2026-06-30` after delete: passed, breakfast entries returned to 0 and totals stayed 0.
 
 ## Known issues
 
 - `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md` still appears to contain Phase 0 prompt content; there was no safe matching source content to restore it.
 - PowerShell on this machine does not support `&&`; commands were run separately.
-- Existing frontend dev server was left running, but no frontend code or UI was changed during Phase 2.
+- Existing frontend dev server was left running, but no frontend code or UI was changed during Phase 3.
+- The current schema does not have separate normalized/deleted/fiber/sugar fields for nutrition.
+
+## Git commits
+
+- `9d3e91d feat: complete phase 0 setup and phase 1 auth`
+- `21fe750 feat: add profile and goals modules`
 
 ## Next recommended step
 
-Review the Phase 2 backend behavior, then start Phase 3 - Nutrition only when explicitly requested.
+Review Phase 3 backend behavior, then start Phase 4 - Dashboard backend only when explicitly requested.
