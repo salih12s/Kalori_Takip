@@ -2,115 +2,117 @@
 
 ## Phase
 
-Phase 1 - Auth backend is implemented.
+Phase 2 - Profile and goals backend is implemented.
+
+## Checkpoint completed before Phase 2
+
+- Initialized Git because the project was not a Git repository.
+- Tightened `.gitignore` for local secrets and generated files.
+- Confirmed `.env`, `node_modules`, `dist`, and build output are ignored.
+- Fixed obvious top-level docs filename/content drift.
+- Confirmed `backend/.env` remains untracked and ignored.
+- Ran backend build and Prisma Client generation.
+- Verified health and auth endpoints before starting Phase 2.
+- Created Git commit:
+  - `9d3e91d feat: complete phase 0 setup and phase 1 auth`
 
 ## Completed work
 
-- Automated local backend env setup.
-- Generated a secure local `JWT_SECRET`.
-- URL-encoded the provided PostgreSQL password for `DATABASE_URL`.
-- Verified PostgreSQL is running.
-- Created local database `kalori_takip`.
-- Installed backend auth dependencies:
-  - `bcrypt`
-  - `jsonwebtoken`
-  - `@types/bcrypt`
-  - `@types/jsonwebtoken`
-- Ran Prisma Client generation.
-- Created and applied initial Prisma migration.
-- Implemented backend auth module only.
-- Added protected auth middleware.
-- Added JWT signing and verification utility.
-- Added shared app error and async handler utilities.
-- Mounted `/api/auth` routes.
-- Verified auth endpoints with live HTTP requests.
+- Implemented protected profile backend endpoints:
+  - `GET /api/profile/me`
+  - `PUT /api/profile/me`
+- Implemented protected goals backend endpoints:
+  - `GET /api/goals/me`
+  - `POST /api/goals`
+  - `PUT /api/goals/:goalId`
+- Added profile module with routes, controller, service, repository, validation, types, and mapper.
+- Added goals module with routes, controller, service, repository, validation, types, and mapper.
+- Mounted profile and goals routes in `backend/src/app.ts`.
+- `GET /api/profile/me` creates a minimal default profile when missing.
+- `GET /api/goals/me` returns `null` when no active goal exists. This is safer than inventing default nutrition or body goals because goals are personal and should be explicitly set.
+- Creating a goal deactivates previous active goals for the current user.
+- Updating a goal checks ownership and deactivates other active goals when `isActive` is set to `true`.
+- Added a minimal Prisma schema extension required by the Phase 2 request:
+  - `Profile.bio`
+  - `Profile.gender`
+  - `UserGoal.dailyCarbGoal`
+  - `UserGoal.dailyFatGoal`
+- Created and applied Prisma migration:
+  - `20260629233621_add_profile_goal_fields`
 
 ## Changed files
 
-- `backend/.env` local ignored file updated with local database URL and generated JWT secret.
-- `backend/package.json`
-- `backend/package-lock.json`
-- `backend/prisma/migrations/20260629232555_init/migration.sql`
-- `backend/src/app.ts`
-- `backend/src/config/env.ts`
-- `backend/src/middlewares/auth.middleware.ts`
-- `backend/src/middlewares/error-handler.middleware.ts`
-- `backend/src/modules/auth/auth.routes.ts`
-- `backend/src/modules/auth/auth.controller.ts`
-- `backend/src/modules/auth/auth.service.ts`
-- `backend/src/modules/auth/auth.repository.ts`
-- `backend/src/modules/auth/auth.validation.ts`
-- `backend/src/modules/auth/auth.types.ts`
-- `backend/src/modules/auth/auth.mapper.ts`
-- `backend/src/shared/errors/app-error.ts`
-- `backend/src/shared/responses/api-response.ts`
-- `backend/src/shared/types/express.d.ts`
-- `backend/src/shared/utils/async-handler.ts`
-- `backend/src/shared/utils/jwt.ts`
+- `.gitignore`
 - `docs/CURRENT_STATE.md`
+- Top-level docs files with obvious filename/content drift.
+- `docs/prompts/PHASE_0_SETUP_PROMPT.md`
+- `backend/prisma/schema.prisma`
+- `backend/prisma/migrations/20260629233621_add_profile_goal_fields/migration.sql`
+- `backend/src/app.ts`
+- `backend/src/modules/profiles/profiles.routes.ts`
+- `backend/src/modules/profiles/profiles.controller.ts`
+- `backend/src/modules/profiles/profiles.service.ts`
+- `backend/src/modules/profiles/profiles.repository.ts`
+- `backend/src/modules/profiles/profiles.validation.ts`
+- `backend/src/modules/profiles/profiles.types.ts`
+- `backend/src/modules/profiles/profiles.mapper.ts`
+- `backend/src/modules/goals/goals.routes.ts`
+- `backend/src/modules/goals/goals.controller.ts`
+- `backend/src/modules/goals/goals.service.ts`
+- `backend/src/modules/goals/goals.repository.ts`
+- `backend/src/modules/goals/goals.validation.ts`
+- `backend/src/modules/goals/goals.types.ts`
+- `backend/src/modules/goals/goals.mapper.ts`
 
 ## Commands run
 
-Environment and database:
+Checkpoint:
 
 ```bash
-node -e "crypto random secret generation"
-pg_isready -h localhost -p 5432 -U postgres
-psql -h localhost -p 5432 -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'kalori_takip';"
-psql -h localhost -p 5432 -U postgres -d postgres -c "CREATE DATABASE kalori_takip;"
+git init
+git check-ignore -v backend/.env backend/node_modules backend/dist frontend/node_modules frontend/dist
+npm run build
+npm run prisma:generate
+git add .
+git commit -m "feat: complete phase 0 setup and phase 1 auth"
 ```
 
-Backend setup and checks:
+Phase 2:
 
 ```bash
-npm install bcrypt jsonwebtoken
-npm install -D @types/bcrypt @types/jsonwebtoken
+npm run prisma:migrate -- --name add_profile_goal_fields
 npm run prisma:generate
-npm run prisma:migrate -- --name init
 npm run build
 ```
 
-Endpoint smoke tests were run against the compiled backend with PowerShell `Invoke-RestMethod`.
+Endpoint tests were run against the compiled backend with PowerShell `Invoke-RestMethod`.
 
 ## Endpoint test results
 
-`GET /api/health`
+Checkpoint:
 
-```json
-{
-  "success": true,
-  "message": "FitBoard API is running"
-}
-```
+- `GET /api/health`: passed.
+- `POST /api/auth/register`: passed, token returned, `passwordHash` not returned.
+- `POST /api/auth/login`: passed, token returned, `passwordHash` not returned.
+- `GET /api/auth/me`: passed with Bearer token, `passwordHash` not returned.
 
-`POST /api/auth/register`
+Phase 2:
 
-- Success: true
-- Token returned: true
-- User returned: true
-- `passwordHash` returned: false
-
-`POST /api/auth/login`
-
-- Success: true
-- Token returned: true
-- User returned: true
-- `passwordHash` returned: false
-
-`GET /api/auth/me`
-
-- Success: true
-- Bearer token accepted: true
-- User returned: true
-- `passwordHash` returned: false
+- `GET /api/health`: passed.
+- `POST /api/auth/register`: passed, token returned, `passwordHash` not returned.
+- `GET /api/auth/me`: passed with Bearer token, `passwordHash` not returned.
+- `GET /api/profile/me`: passed, default profile created when missing.
+- `PUT /api/profile/me`: passed with `fullName`, `bio`, `gender`, `birthDate`, `heightCm`, `currentWeightKg`, and `privacyLevel`.
+- `GET /api/goals/me`: passed, returned `null` before goal creation.
+- `POST /api/goals`: passed, active goal created with carb and fat goals.
+- `PUT /api/goals/:goalId`: passed, owned goal updated.
 
 ## Known issues
 
-- Several existing docs still appear to have filename/content drift. For example, database schema content appears in `docs/API_CONTRACT.md`, while `docs/DATABASE_SCHEMA.md` currently contains backend rules.
-- This folder is not currently initialized as a Git repository.
-- One `npm install ... && ...` attempt failed because this PowerShell version does not accept `&&`; the installs were rerun successfully as separate commands.
-- A running backend watcher temporarily locked Prisma Client generation on Windows; that backend watcher was stopped and Prisma generation succeeded.
+- `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md` still appears to contain Phase 0 prompt content; there was no safe matching source content to restore it.
+- PowerShell on this machine does not support `&&`; commands were run separately.
+- Existing frontend dev server was left running, but no frontend code or UI was changed during Phase 2.
 
 ## Next recommended step
 
-Start Phase 2 - Profile and goals after reviewing the backend auth behavior. Do not start frontend auth UI until explicitly requested.
+Review the Phase 2 backend behavior, then start Phase 3 - Nutrition only when explicitly requested.
