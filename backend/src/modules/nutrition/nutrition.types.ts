@@ -23,6 +23,8 @@ export type FoodResponse = {
   protein: number;
   carbs: number;
   fat: number;
+  fiber: number | null;
+  sugar: number | null;
   source: FoodSource;
   aliases: string[];
   createdAt: Date;
@@ -40,6 +42,8 @@ export type FoodEntryResponse = {
   protein: number;
   carbs: number;
   fat: number;
+  fiber: number | null;
+  sugar: number | null;
   createdAt: Date;
   updatedAt: Date;
 };

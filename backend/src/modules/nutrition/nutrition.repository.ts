@@ -14,17 +14,20 @@ type FoodEntrySnapshot = {
   protein: number;
   carbs: number;
   fat: number;
+  fiber: number | null;
+  sugar: number | null;
 };
 
 export const nutritionRepository = {
   searchFoods(query: string, normalizedQuery: string) {
     return prisma.food.findMany({
       where: {
+        deletedAt: null,
         OR: [
           { name: { contains: query, mode: "insensitive" } },
-          { name: { contains: normalizedQuery, mode: "insensitive" } },
+          { normalizedName: { contains: normalizedQuery, mode: "insensitive" } },
           { aliases: { some: { alias: { contains: query, mode: "insensitive" } } } },
-          { aliases: { some: { alias: { contains: normalizedQuery, mode: "insensitive" } } } }
+          { aliases: { some: { normalizedAlias: { contains: normalizedQuery, mode: "insensitive" } } } }
         ]
       },
       include: { aliases: true },
@@ -33,20 +36,23 @@ export const nutritionRepository = {
     });
   },
 
-  createFood(userId: string, input: CreateFoodInput, normalizedAliases: string[]) {
+  createFood(userId: string, input: CreateFoodInput, normalizedName: string, aliases: { alias: string; normalizedAlias: string }[]) {
     return prisma.food.create({
       data: {
         userId,
         name: input.name,
+        normalizedName,
         servingSize: input.servingSize,
         servingUnit: input.servingUnit,
         calories: input.calories,
         protein: input.protein,
         carbs: input.carbs,
         fat: input.fat,
+        fiber: input.fiber,
+        sugar: input.sugar,
         source: "USER_CREATED",
         aliases: {
-          create: normalizedAliases.map((alias) => ({ alias }))
+          create: aliases
         }
       },
       include: { aliases: true }
@@ -54,8 +60,8 @@ export const nutritionRepository = {
   },
 
   findFoodById(foodId: string) {
-    return prisma.food.findUnique({
-      where: { id: foodId }
+    return prisma.food.findFirst({
+      where: { id: foodId, deletedAt: null }
     });
   },
 

@@ -30,8 +30,18 @@ type EntryResult = {
 
 const mealTypeOrder = [MealType.BREAKFAST, MealType.LUNCH, MealType.DINNER, MealType.SNACK];
 
-function uniqueNormalizedAliases(aliases: string[] | undefined): string[] {
-  return Array.from(new Set((aliases ?? []).map(normalizeText).filter(Boolean)));
+function uniqueAliases(aliases: string[] | undefined): { alias: string; normalizedAlias: string }[] {
+  const aliasMap = new Map<string, string>();
+
+  for (const alias of aliases ?? []) {
+    const normalizedAlias = normalizeText(alias);
+
+    if (normalizedAlias) {
+      aliasMap.set(normalizedAlias, alias.trim());
+    }
+  }
+
+  return Array.from(aliasMap, ([normalizedAlias, alias]) => ({ alias, normalizedAlias }));
 }
 
 function calculateEntryNutrition(food: Awaited<ReturnType<typeof nutritionRepository.findFoodById>>, input: CreateMealEntryInput) {
@@ -55,7 +65,9 @@ function calculateEntryNutrition(food: Awaited<ReturnType<typeof nutritionReposi
     calories: Math.round(food.calories * multiplier),
     protein: roundMacro(Number(food.protein) * multiplier),
     carbs: roundMacro(Number(food.carbs) * multiplier),
-    fat: roundMacro(Number(food.fat) * multiplier)
+    fat: roundMacro(Number(food.fat) * multiplier),
+    fiber: food.fiber != null ? roundMacro(Number(food.fiber) * multiplier) : null,
+    sugar: food.sugar != null ? roundMacro(Number(food.sugar) * multiplier) : null
   };
 }
 
@@ -84,8 +96,9 @@ export const nutritionService = {
   },
 
   async createFood(userId: string, input: CreateFoodInput): Promise<FoodResponse> {
-    const normalizedAliases = uniqueNormalizedAliases(input.aliases);
-    const food = await nutritionRepository.createFood(userId, input, normalizedAliases);
+    const normalizedName = normalizeText(input.name);
+    const aliases = uniqueAliases(input.aliases);
+    const food = await nutritionRepository.createFood(userId, input, normalizedName, aliases);
 
     return toFoodResponse(food);
   },

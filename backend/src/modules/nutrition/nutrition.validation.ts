@@ -19,6 +19,8 @@ export const createFoodSchema = z
     protein: z.number().min(0).max(1000),
     carbs: z.number().min(0).max(1000),
     fat: z.number().min(0).max(1000),
+    fiber: z.number().min(0).max(1000).optional(),
+    sugar: z.number().min(0).max(1000).optional(),
     aliases: z.array(z.string().trim().min(1).max(160)).max(20).optional()
   })
   .strict();

@@ -21,6 +21,8 @@ export function toFoodResponse(food: FoodWithAliases): FoodResponse {
     protein: Number(food.protein),
     carbs: Number(food.carbs),
     fat: Number(food.fat),
+    fiber: food.fiber != null ? Number(food.fiber) : null,
+    sugar: food.sugar != null ? Number(food.sugar) : null,
     source: food.source,
     aliases: food.aliases.map((alias) => alias.alias),
     createdAt: food.createdAt,
@@ -40,6 +42,8 @@ export function toFoodEntryResponse(entry: FoodEntry): FoodEntryResponse {
     protein: Number(entry.protein),
     carbs: Number(entry.carbs),
     fat: Number(entry.fat),
+    fiber: entry.fiber != null ? Number(entry.fiber) : null,
+    sugar: entry.sugar != null ? Number(entry.sugar) : null,
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt
   };
