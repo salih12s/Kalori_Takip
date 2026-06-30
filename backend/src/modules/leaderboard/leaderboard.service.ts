@@ -1,4 +1,4 @@
-import { LeaderboardPointSource } from "@prisma/client";
+import { FollowStatus, LeaderboardPointSource } from "@prisma/client";
 
 import { AppError } from "../../shared/errors/app-error.js";
 import { addDays, formatDateOnly, startOfWeek, todayDateOnly } from "../../shared/utils/date.js";
@@ -13,6 +13,7 @@ import {
 import { leaderboardRepository, type DailyScoringData, type LeaderboardDailyLog } from "./leaderboard.repository.js";
 import type {
   DailyScoreResponse,
+  LeaderboardFollowStatus,
   LeaderboardPeriodResponse,
   LeaderboardSummaryResponse,
   PointItem,
@@ -130,22 +131,57 @@ function toDailyScoreResponse(date: Date, points: PointItem[]): DailyScoreRespon
   };
 }
 
-async function leaderboardForRange(userId: string, startDate: Date, endDate: Date): Promise<LeaderboardPeriodResponse> {
-  const visibleUserIds = await leaderboardRepository.getVisibleUserIds(userId);
-  const [users, logs] = await Promise.all([
-    leaderboardRepository.getUsers(visibleUserIds),
-    leaderboardRepository.getDailyLogsForUsers(visibleUserIds, startDate, endDate)
+type LeaderboardScope = "global" | "friends";
+
+function resolveFollowStatus(
+  rowUserId: string,
+  currentUserId: string,
+  followStatuses: Map<string, FollowStatus>
+): LeaderboardFollowStatus {
+  if (rowUserId === currentUserId) {
+    return "SELF";
+  }
+
+  const status = followStatuses.get(rowUserId);
+
+  if (status === FollowStatus.ACCEPTED) {
+    return "ACCEPTED";
+  }
+
+  if (status === FollowStatus.PENDING) {
+    return "PENDING";
+  }
+
+  return "NONE";
+}
+
+async function leaderboardForRange(
+  userId: string,
+  startDate: Date,
+  endDate: Date,
+  scope: LeaderboardScope = "global"
+): Promise<LeaderboardPeriodResponse> {
+  // Global scope shows every registered user; friends scope keeps the follow graph.
+  const targetUserIds =
+    scope === "friends"
+      ? await leaderboardRepository.getVisibleUserIds(userId)
+      : await leaderboardRepository.getAllUserIds();
+  const [users, logs, followStatuses] = await Promise.all([
+    leaderboardRepository.getUsers(targetUserIds),
+    leaderboardRepository.getDailyLogsForUsers(targetUserIds, startDate, endDate),
+    leaderboardRepository.getFollowStatuses(userId, targetUserIds)
   ]);
   const summaries = new Map(users.map((user) => [user.id, mapUserSummary(user)]));
-  const rows = visibleUserIds.map((visibleUserId) => {
-    const userLogs = logs.filter((log) => log.userId === visibleUserId);
+  const rows = targetUserIds.map((targetUserId) => {
+    const userLogs = logs.filter((log) => log.userId === targetUserId);
 
     return {
-      user: summaries.get(visibleUserId)!,
+      user: summaries.get(targetUserId)!,
       totalScore: userLogs.reduce((sum, log) => sum + log.dailyScore, 0),
       totalSteps: userLogs.reduce((sum, log) => sum + log.totalSteps, 0),
       workoutDays: userLogs.filter((log) => log.isWorkoutDay).length,
-      loggedDays: userLogs.filter(hasLoggedDay).length
+      loggedDays: userLogs.filter(hasLoggedDay).length,
+      followStatus: resolveFollowStatus(targetUserId, userId, followStatuses)
     };
   });
 
@@ -184,18 +220,20 @@ export const leaderboardService = {
     return { days: results };
   },
 
-  getWeekly(userId: string, startDate = startOfWeek(todayDateOnly())) {
-    return leaderboardForRange(userId, startDate, addDays(startDate, 6));
+  getWeekly(userId: string, startDate = startOfWeek(todayDateOnly()), scope: LeaderboardScope = "global") {
+    return leaderboardForRange(userId, startDate, addDays(startDate, 6), scope);
   },
 
-  getMonthly(userId: string, month?: string) {
+  getMonthly(userId: string, month?: string, scope: LeaderboardScope = "global") {
     const range = monthRange(month);
 
-    return leaderboardForRange(userId, range.startDate, range.endDate);
+    return leaderboardForRange(userId, range.startDate, range.endDate, scope);
   },
 
   getFriends(userId: string, period: "weekly" | "monthly") {
-    return period === "monthly" ? this.getMonthly(userId) : this.getWeekly(userId);
+    return period === "monthly"
+      ? this.getMonthly(userId, undefined, "friends")
+      : this.getWeekly(userId, undefined, "friends");
   },
 
   async getMySummary(userId: string): Promise<LeaderboardSummaryResponse> {

@@ -7,7 +7,7 @@ interface LeaderboardTableProps {
   currentUserId?: string;
 }
 
-const columns = ["Sıra", "Kullanıcı", "Puan", "Adım", "Spor Günü", "Kayıtlı Gün"];
+const columns = ["Sıra", "Kullanıcı", "Puan", "Adım", "Spor Günü", "Kayıtlı Gün", "İşlem"];
 
 export function LeaderboardTable({ rows, currentUserId }: LeaderboardTableProps) {
   if (rows.length === 0) {

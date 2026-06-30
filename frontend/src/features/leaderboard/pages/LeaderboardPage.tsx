@@ -29,7 +29,7 @@ export function LeaderboardPage() {
     <PageShell>
       <PageHeader
         title="Liderlik Tablosu"
-        description="Arkadaşlarınla haftalık ve aylık ilerlemeni karşılaştır."
+        description="Tüm kullanıcıların ilerlemesini gör, arkadaş ekle ve haftalık/aylık sıralamada yerini takip et."
         action={<RecalculateScoreButton />}
       />
 

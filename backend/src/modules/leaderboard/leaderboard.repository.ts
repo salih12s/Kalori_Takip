@@ -83,6 +83,21 @@ export const leaderboardRepository = {
     return [...new Set([userId, ...follows.flatMap((follow) => [follow.followerId, follow.followingId])])];
   },
 
+  async getAllUserIds() {
+    const users = await prisma.user.findMany({ select: { id: true } });
+
+    return users.map((user) => user.id);
+  },
+
+  async getFollowStatuses(currentUserId: string, userIds: string[]) {
+    const follows = await prisma.follow.findMany({
+      where: { followerId: currentUserId, followingId: { in: userIds } },
+      select: { followingId: true, status: true }
+    });
+
+    return new Map(follows.map((follow) => [follow.followingId, follow.status]));
+  },
+
   getUsers(userIds: string[]) {
     return prisma.user.findMany({
       where: { id: { in: userIds } },

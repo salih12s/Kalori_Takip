@@ -1,5 +1,6 @@
 import { cn } from "../../../lib/cn";
 import type { LeaderboardRow as LeaderboardRowData } from "../types/leaderboard.types";
+import { LeaderboardFollowButton } from "./LeaderboardFollowButton";
 
 interface LeaderboardRowProps {
   row: LeaderboardRowData;
@@ -23,6 +24,9 @@ export function LeaderboardRow({ row, isCurrentUser }: LeaderboardRowProps) {
       <td className="px-3 py-3 text-sm text-stone-600">{row.totalSteps}</td>
       <td className="px-3 py-3 text-sm text-stone-600">{row.workoutDays}</td>
       <td className="px-3 py-3 text-sm text-stone-600">{row.loggedDays}</td>
+      <td className="px-3 py-3">
+        <LeaderboardFollowButton userId={row.user.id} status={row.followStatus} />
+      </td>
     </tr>
   );
 }

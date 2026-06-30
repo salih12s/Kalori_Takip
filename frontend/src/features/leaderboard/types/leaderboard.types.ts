@@ -35,6 +35,8 @@ export interface LeaderboardUserSummary {
   privacyLevel: PrivacyLevel | null;
 }
 
+export type LeaderboardFollowStatus = "SELF" | "ACCEPTED" | "PENDING" | "NONE";
+
 export interface LeaderboardRow {
   rank: number;
   user: LeaderboardUserSummary;
@@ -42,6 +44,7 @@ export interface LeaderboardRow {
   totalSteps: number;
   workoutDays: number;
   loggedDays: number;
+  followStatus: LeaderboardFollowStatus;
 }
 
 export interface LeaderboardPeriodResponse {

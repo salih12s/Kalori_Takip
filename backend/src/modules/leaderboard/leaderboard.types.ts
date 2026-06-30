@@ -29,6 +29,9 @@ export type LeaderboardUserSummary = {
   privacyLevel: PrivacyLevel | null;
 };
 
+/** Follow relationship of the current viewer to a leaderboard row's user. */
+export type LeaderboardFollowStatus = "SELF" | "ACCEPTED" | "PENDING" | "NONE";
+
 export type LeaderboardRow = {
   rank: number;
   user: LeaderboardUserSummary;
@@ -36,6 +39,7 @@ export type LeaderboardRow = {
   totalSteps: number;
   workoutDays: number;
   loggedDays: number;
+  followStatus: LeaderboardFollowStatus;
 };
 
 export type LeaderboardPeriodResponse = {

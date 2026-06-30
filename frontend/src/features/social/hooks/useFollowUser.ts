@@ -9,6 +9,7 @@ export function useFollowUser() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["social", "search"] });
       void queryClient.invalidateQueries({ queryKey: ["social", "friends"] });
+      void queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
     },
   });
 }
