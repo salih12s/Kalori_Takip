@@ -92,6 +92,13 @@ npx prisma migrate status
 
 ## Development
 
+Run backend and frontend together from the project root:
+
+```bash
+npm install
+npm run dev
+```
+
 Backend:
 
 ```bash
