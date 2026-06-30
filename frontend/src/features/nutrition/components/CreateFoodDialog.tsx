@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
+import { motion } from "motion/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -82,12 +83,19 @@ export function CreateFoodDialog({ open, onClose }: CreateFoodDialogProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-stone-950/30 px-4 py-6">
-      <section className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-stone-200 bg-white p-5 shadow-xl">
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-stone-950/40 px-4 py-6">
+      <motion.section
+        initial={{ opacity: 0, scale: 0.98, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-stone-200 bg-white p-5 shadow-xl"
+      >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-stone-900">Yeni Yemek Oluştur</h2>
-            <p className="text-sm text-stone-500">Kendi lokal yemek verini ekle.</p>
+            <h2 className="text-lg font-semibold text-stone-900">Manuel Yemek Ekle</h2>
+            <p className="text-sm text-stone-500">
+              Dış kaynakta bulamadığın yemekleri manuel ekleyebilirsin.
+            </p>
           </div>
           <button
             type="button"
@@ -143,11 +151,11 @@ export function CreateFoodDialog({ open, onClose }: CreateFoodDialogProps) {
               İptal
             </button>
             <button type="submit" disabled={createMutation.isPending} className={primaryButtonClassName}>
-              {createMutation.isPending ? "Oluşturuluyor..." : "Yemek Oluştur"}
+              {createMutation.isPending ? "Oluşturuluyor..." : "Manuel Yemek Ekle"}
             </button>
           </div>
         </form>
-      </section>
+      </motion.section>
     </div>
   );
 }

@@ -1,11 +1,9 @@
-import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { PageShell } from "../../../components/layout/PageShell";
 import { ErrorState } from "../../../components/shared/ErrorState";
 import { PageHeader } from "../../../components/shared/PageHeader";
-import { inputClassName, primaryButtonClassName } from "../../../lib/ui";
-import { CreateFoodDialog } from "../components/CreateFoodDialog";
+import { inputClassName } from "../../../lib/ui";
 import { DailyNutritionSummary } from "../components/DailyNutritionSummary";
 import { MealCard } from "../components/MealCard";
 import { MealTabs } from "../components/MealTabs";
@@ -24,7 +22,6 @@ function todayDateInputValue(): string {
 export function NutritionPage() {
   const [selectedDate, setSelectedDate] = useState(todayDateInputValue);
   const [selectedMealType, setSelectedMealType] = useState<MealType>("BREAKFAST");
-  const [isCreateFoodOpen, setIsCreateFoodOpen] = useState(false);
   const mealsQuery = useDailyMeals(selectedDate);
 
   if (mealsQuery.isLoading) {
@@ -58,16 +55,6 @@ export function NutritionPage() {
       <PageHeader
         title="Yemek Günlüğü"
         description="Öğünlerini ve günlük kalori takibini buradan yönet."
-        action={
-          <button
-            type="button"
-            onClick={() => setIsCreateFoodOpen(true)}
-            className={`${primaryButtonClassName} sm:w-auto`}
-          >
-            <Plus size={16} />
-            Yeni Yemek
-          </button>
-        }
       />
 
       <div className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -92,8 +79,6 @@ export function NutritionPage() {
       />
 
       <MealCard date={selectedDate} mealType={selectedMealType} meal={selectedMeal} />
-
-      <CreateFoodDialog open={isCreateFoodOpen} onClose={() => setIsCreateFoodOpen(false)} />
     </PageShell>
   );
 }

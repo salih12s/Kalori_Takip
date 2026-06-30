@@ -109,12 +109,17 @@ export const nutritionService = {
         .filter((externalId): externalId is string => externalId !== null)
     );
     const externalFoods = externalResult.foods.filter((food) => !cachedExternalIds.has(food.externalId));
+    const localResults = localFoods.map(toLocalFoodSearchResult);
+    const externalResults = externalFoods.map(toExternalFoodSearchResult);
+    const foods =
+      input.source === "all"
+        ? [...externalResults, ...localResults]
+        : input.source === "external"
+          ? externalResults
+          : localResults;
 
     return {
-      foods: [
-        ...localFoods.map(toLocalFoodSearchResult),
-        ...externalFoods.map(toExternalFoodSearchResult)
-      ].slice(0, 20),
+      foods: foods.slice(0, 20),
       externalSearchFailed: externalResult.failed
     };
   },

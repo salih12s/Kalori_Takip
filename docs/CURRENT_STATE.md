@@ -2,143 +2,152 @@
 
 ## Phase
 
-Phase 18 - Final Polish + Responsive + Deploy Prep + GitHub Repository Setup is complete.
+Post-MVP UX improvement - Nutrition External Search UX Fix + Auto Food Data + Light Animations is complete.
 
 ## Completed work
 
-- Ran final Git safety checks.
-- Added GitHub remote:
-  - `origin https://github.com/salih12s/Kalori_Takip.git`
-- Audited ignored files and tracked files for env/build/secret artifacts.
-- Confirmed `.env`, `.env.*`, `node_modules`, `dist`, `build`, logs, coverage and secret/key patterns are ignored.
-- Confirmed no real `.env`, `node_modules`, `dist`, `build`, secret or key files are tracked.
-- Added route-level frontend code splitting with `React.lazy` and `Suspense`.
-- Kept route guards and protected app layout behavior unchanged.
-- Updated root `README.md` for current project setup, stack, features, env variables, build commands, Prisma commands and deploy/security notes.
-- Ran final backend checks.
-- Ran final frontend build and route smoke checks.
-- No backend business logic or Prisma schema changes were made in this phase.
-- No new product features were added.
+- Improved Nutrition page UX so normal users no longer start with manual calorie/macro entry.
+- Removed the prominent top-level `Yeni Yemek` action from the Nutrition page header.
+- Kept manual food creation as a secondary fallback inside the add food dialog via `Manuel ekle`.
+- Made food search external-first by default.
+- Fixed Turkish common food search behavior for terms such as `yumurta`.
+- Added a small Turkish alias and common food fallback layer for Open Food Facts searches.
+- Preserved the existing `Food` table, cache/import flow, duplicate prevention and meal entry creation.
+- Added result cards that show food name, serving, calories, protein, carbs and fat before selection.
+- External results now use `İçe Aktar ve Ekle`; cached/local results use `Seç ve Ekle`.
+- Added selected food preview before quantity/unit entry.
+- Added light Motion animations for dialog content, result cards and selected food preview.
+- Added root `npm run dev` support so backend and frontend can run together.
 
-## Polish changes
+## Backend fixes
 
-- `frontend/src/app/router/AppRouter.tsx`
-  - Converted route page imports to lazy imports.
-  - Added a small Turkish loading fallback: `Yükleniyor...`
-  - Preserved auth layout, onboarding guard, protected layout and app routes.
-- `README.md`
-  - Replaced stale Phase 0 content with current FitBoard / KaloriTakip setup and deploy guidance.
+- `backend/src/modules/nutrition/external/open-food-facts.provider.ts`
+  - Added Turkish query alias fallback.
+  - Alias-backed searches now prefer the alias first, avoiding irrelevant Open Food Facts results for Turkish terms.
+  - Kept timeout handling and safe development-only metadata logging.
+  - Merges common fallback results with Open Food Facts results and de-duplicates by `externalId`.
+- `backend/src/modules/nutrition/external/common-food-fallbacks.ts`
+  - Added a small maintainable set of common food fallback values for common Turkish searches.
+- `backend/src/modules/nutrition/nutrition.service.ts`
+  - `source=all` now returns external results first, then cached/local results.
 
-## Responsive review
+## Frontend UX changes
 
-Reviewed final structure for:
+- `frontend/src/features/nutrition/pages/NutritionPage.tsx`
+  - Removed the prominent manual `Yeni Yemek` header action.
+- `frontend/src/features/nutrition/components/AddFoodEntryDialog.tsx`
+  - External-first search flow.
+  - Selected food preview.
+  - Only quantity and unit are entered after selection.
+  - Manual create is a secondary fallback.
+- `frontend/src/features/nutrition/components/FoodSearchInput.tsx`
+  - Defaults to `Dış kaynakta ara`.
+  - Separates external results from `Önbellekteki Yemekler`.
+  - Shows friendly Turkish external failure/empty messages.
+- `frontend/src/features/nutrition/components/CreateFoodDialog.tsx`
+  - Retitled to `Manuel Yemek Ekle`.
+  - Clarifies that manual creation is for foods not found externally.
 
-- Protected app layout only on authenticated app routes.
-- Auth pages outside `AppLayout`.
-- Desktop-only sidebar.
-- Mobile bottom navigation.
-- Table mobile behavior through existing horizontal overflow wrappers.
-- Dialog/mobile width patterns.
-- Shared loading/error/empty state usage.
+## Animation changes
 
-No broad redesign was needed. The only code polish applied was route-level code splitting, which also improved the bundle warning.
-
-## Env/security audit
-
-Commands used:
-
-```bash
-git status --ignored --short
-git ls-files | Select-String -Pattern '(\\.env|node_modules|dist|build|secret|key)'
-git diff --check
-```
-
-Results:
-
-- Ignored local files include `backend/.env`, `frontend/.env`, `node_modules`, `dist` and logs.
-- Tracked matches are only safe example files:
-  - `backend/.env.example`
-  - `frontend/.env.example`
-- No actual secret values were printed or committed.
-
-## Build and smoke test results
-
-Backend:
-
-- `npm run prisma:generate` passed.
-- `npx prisma migrate status` passed and reports database schema is up to date.
-- `npm run build` passed.
-- `GET /api/health` returned success.
-
-Frontend:
-
-- `npm run build` passed.
-- Route-level code splitting removed the previous Vite `>500 kB` chunk warning.
-- `npm run preview -- --host 127.0.0.1 --port 4198 --strictPort` started successfully.
-- Preview route smoke returned HTTP 200 for:
-  - `/login`
-  - `/register`
-  - `/dashboard`
-  - `/nutrition`
-  - `/activity`
-  - `/friends`
-  - `/leaderboard`
-  - `/profile`
-  - `/settings`
-  - `/challenges`
-  - `/badges`
+- Dialog content uses subtle fade/scale.
+- Food result cards use subtle fade/slide and hover lift.
+- Selected food preview fades in.
+- Existing skeleton/loading behavior remains unchanged.
 
 ## Changed files
 
+Backend:
+
+- `backend/src/modules/nutrition/external/open-food-facts.provider.ts`
+- `backend/src/modules/nutrition/external/common-food-fallbacks.ts`
+- `backend/src/modules/nutrition/nutrition.service.ts`
+
+Frontend:
+
+- `frontend/src/features/nutrition/components/AddFoodEntryDialog.tsx`
+- `frontend/src/features/nutrition/components/CreateFoodDialog.tsx`
+- `frontend/src/features/nutrition/components/FoodSearchInput.tsx`
+- `frontend/src/features/nutrition/components/FoodResultCard.tsx`
+- `frontend/src/features/nutrition/components/FoodSourceTabs.tsx`
+- `frontend/src/features/nutrition/components/SelectedFoodPreview.tsx`
+- `frontend/src/features/nutrition/pages/NutritionPage.tsx`
+- `frontend/src/features/nutrition/utils/food-emoji.ts`
+
+Project/dev:
+
+- `package.json`
+- `package-lock.json`
 - `README.md`
-- `frontend/src/app/router/AppRouter.tsx`
 - `docs/CURRENT_STATE.md`
 
 ## Commands run
 
 ```bash
-git status
-git log --oneline --decorate -10
-git remote -v
-git status --ignored --short
-git ls-files | Select-String -Pattern '(\\.env|node_modules|dist|build|secret|key)'
-git remote add origin https://github.com/salih12s/Kalori_Takip.git
+npm install
 npm run prisma:generate
 npx prisma migrate status
 npm run build
 npm run build
-npm run preview -- --host 127.0.0.1 --port 4198 --strictPort
+npm run preview -- --host 127.0.0.1 --port 4199 --strictPort
 git diff --check
 ```
 
-## GitHub remote status
+Also tested root development startup earlier:
 
-- `origin` is configured as:
-  - `https://github.com/salih12s/Kalori_Takip.git`
+```bash
+npm run dev
+```
 
-## Current phase status
+## Backend check results
 
-Phase 18 is complete and ready to commit and push.
+Live backend smoke test passed:
 
-## Git commits
+- `GET /api/health` returned success.
+- Authenticated `GET /api/foods/search?q=yumurta&source=external` returned:
+  - `externalSearchFailed = false`
+  - `10` results
+  - first result `Yumurta`
+  - first result `155 kcal`
+- Authenticated `GET /api/foods/search?q=egg&source=external` returned a clean external result.
+- Authenticated `GET /api/foods/search?q=yumurta&source=all` returned external results first.
+- Imported the first external/common food result.
+- Duplicate import returned the same food id.
+- Added imported food to a meal through `POST /api/meals/entries`.
+- Daily totals updated to `155 kcal` and `13g protein` for the smoke entry.
 
-Latest committed work before this phase:
+## Frontend check results
 
-- `83fe47a feat: add external food search cache`
-
-Next commit:
-
-- `chore: final polish and deploy prep`
+- `npm run build` passed.
+- Preview route smoke returned HTTP 200 for `/nutrition`.
+- `NutritionPage` no longer contains the top-level `Yeni Yemek` action.
+- Added/verified Turkish UI copy:
+  - `Dış kaynakta ara`
+  - `İçe Aktar ve Ekle`
+  - `Seçilen Yemek`
+  - `Manuel ekle`
+  - `Öğüne Ekle`
+- File sizes remain within project limits:
+  - `FoodSearchInput.tsx`: 144 lines
+  - `AddFoodEntryDialog.tsx`: 119 lines
+  - `NutritionPage.tsx`: 73 lines
 
 ## Known issues
 
-- Full browser automation is not installed; frontend verification used production build and Vite preview route smoke.
-- Local ignored files remain on disk (`.env`, `node_modules`, `dist`, logs), as expected.
+- Open Food Facts can still be intermittently unavailable. For common Turkish foods, the app now has a small fallback so the user can still select/import food data.
+- Full browser automation is not installed; frontend validation used TypeScript build, Vite preview route smoke and source checks.
+- Smoke tests added local development database rows.
 
-## Final project status
+## Current project status
 
-The project is ready for GitHub push and deployment preparation. Backend and frontend builds pass, migrations are up to date, route smoke checks pass, secrets are ignored, and README setup guidance is current.
+Nutrition normal flow is now external-first and no longer asks the user to manually enter calories/macros before searching.
 
-## Next recommended deployment step
+## Git commits
 
-Push the `master` branch to GitHub, then configure deployment hosting with production environment variables.
+Next commit:
+
+- `feat: improve external-first nutrition search ux`
+
+## Next recommended step
+
+After commit, push the new post-MVP UX fix to GitHub.
