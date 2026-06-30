@@ -2,7 +2,7 @@
 
 ## Phase
 
-Production/Local Env Scripts, Railway Deploy Hardening and Dashboard Card Layout Fix is complete.
+Production/Local Env Scripts, Railway Deploy Hardening, Railway Root Start Fallback and Dashboard Card Layout Fix is complete.
 
 ## Completed work
 
@@ -10,6 +10,9 @@ Production/Local Env Scripts, Railway Deploy Hardening and Dashboard Card Layout
 - Created ignored local env switching scripts with placeholders only.
 - Hardened `.gitignore` for real env files and real local/prod bat scripts.
 - Added backend Railway production scripts.
+- Added root Railway fallback scripts and `railway.json` for services that build from the repository root.
+- Kept Railway build installs explicit with `npm ci --include=dev`.
+- Moved backend runtime deploy tools used by `start:prod` into production dependencies.
 - Added `CLIENT_URL` env alias support for backend frontend URL configuration.
 - Added `VITE_SOCKET_URL` support for frontend realtime socket URL configuration.
 - Updated README with local env switching, Railway backend settings and DBeaver Railway DB notes.
@@ -49,10 +52,15 @@ Production/Local Env Scripts, Railway Deploy Hardening and Dashboard Card Layout
   - production server start
 - README documents Railway backend service settings:
   - Root Directory: `backend`
-  - Build Command: `npm ci && npm run prisma:generate && npm run build`
+  - Build Command: `npm ci --include=dev && npm run prisma:generate && npm run build`
   - Start Command: `npm run start:prod`
   - `DATABASE_URL=${{ Postgres.DATABASE_URL }}`
 - README warns not to use localhost for Railway backend `DATABASE_URL`.
+- Root-level fallback is now available for Railway services that build from the repository root:
+  - Build Command: `npm run railway:build`
+  - Start Command: `npm run start`
+  - Healthcheck Path: `/api/health`
+- `railway.json` pins the root fallback build/start commands for Railpack.
 
 ## Dashboard layout fix
 
@@ -80,12 +88,15 @@ Root/docs:
 - `.gitignore`
 - `README.md`
 - `docs/CURRENT_STATE.md`
+- `package.json`
+- `railway.json`
 - `set-local-env.example.bat`
 - `set-production-env.example.bat`
 
 Backend:
 
 - `backend/package.json`
+- `backend/package-lock.json`
 - `backend/.env.example`
 - `backend/src/config/env.ts`
 
@@ -112,6 +123,10 @@ npm --prefix frontend run build
 npm --prefix backend run start:prod
 Invoke-RestMethod http://localhost:5000/api/health
 npm --prefix frontend run preview -- --host 127.0.0.1 --port 4203 --strictPort
+npm --prefix backend install
+npm run railway:build
+npm run start
+Invoke-RestMethod http://localhost:5000/api/health
 ```
 
 ## Backend check results
@@ -126,6 +141,11 @@ npm --prefix frontend run preview -- --host 127.0.0.1 --port 4203 --strictPort
   - seeded 188 curated foods
   - started API server
 - `GET /api/health` returned success.
+- Root `npm run railway:build` passed and delegates to backend install, Prisma generate and TypeScript build.
+- Root `npm run start` passed and delegates to backend `start:prod`.
+- Root-started `GET /api/health` returned:
+  - `success: true`
+  - `message: FitBoard API is running`
 
 ## Frontend check results
 
@@ -151,19 +171,21 @@ npm --prefix frontend run preview -- --host 127.0.0.1 --port 4203 --strictPort
 ## Known issues
 
 - Full browser visual automation was not run; dashboard layout was verified by source structure and production preview route smoke.
-- Railway deployment itself still depends on Railway service configuration being set to `Root Directory: backend`.
+- Railway deployment should use `Root Directory: backend` when possible, but root-level fallback scripts/config now cover accidental repository-root deploys too.
 - `start:prod` seeds curated foods on startup by design; seed is idempotent.
+- Local Windows Prisma DLL locks can happen if `node dist/server.js` is still running; stopping the stale local Node process resolves it.
 
 ## Current project status
 
-The repository is safer for local/production env switching, Railway backend deployment is documented and script-ready, and dashboard metric cards should remain balanced in dark and light layouts.
+The repository is safer for local/production env switching, Railway backend deployment is documented/script-ready from both backend root and repository root, and dashboard metric cards should remain balanced in dark and light layouts.
 
 ## Git commits
 
-Next commit:
+Latest commits:
 
 - `chore: add env scripts and railway deploy hardening`
+- `chore: add railway root start fallback`
 
 ## Next recommended step
 
-Push this commit and set Railway backend service root/build/start settings exactly as documented in README.
+Redeploy Railway. If the service keeps using the repository root, it should now detect `npm run start` and use `railway.json` to build/start the backend.

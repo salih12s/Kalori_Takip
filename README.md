@@ -174,14 +174,22 @@ npm run preview
 
 ### Railway Backend Service
 
-Railway should deploy the backend service from the backend folder, not the repository root.
+Railway should deploy the backend service from the backend folder when possible. The repository also includes root-level Railway fallback config, so a service that accidentally builds from the repository root will still delegate build/start to the backend.
 
 Recommended backend service settings:
 
 ```txt
 Root Directory: backend
-Build Command: npm ci && npm run prisma:generate && npm run build
+Build Command: npm ci --include=dev && npm run prisma:generate && npm run build
 Start Command: npm run start:prod
+```
+
+Root fallback settings, if Railway is building from the repository root:
+
+```txt
+Build Command: npm run railway:build
+Start Command: npm run start
+Healthcheck Path: /api/health
 ```
 
 Required Railway backend variables:
@@ -193,6 +201,8 @@ NODE_ENV=production
 FRONTEND_URL=https://frontend-domain
 CLIENT_URL=https://frontend-domain
 ```
+
+Railway provides `PORT` automatically; do not hardcode a production `PORT` unless the platform explicitly asks for it.
 
 Do not set Railway `DATABASE_URL` to localhost. Railway Postgres provides `DATABASE_URL`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD` and `PGDATABASE` from the Postgres service.
 

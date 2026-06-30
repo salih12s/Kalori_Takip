@@ -8,7 +8,10 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "build": "npm --prefix backend run build && npm --prefix frontend run build",
     "build:backend": "npm --prefix backend run build",
-    "build:frontend": "npm --prefix frontend run build"
+    "build:frontend": "npm --prefix frontend run build",
+    "railway:build": "npm --prefix backend ci --include=dev && npm --prefix backend run prisma:generate && npm --prefix backend run build",
+    "start": "npm --prefix backend run start:prod",
+    "start:backend": "npm --prefix backend run start:prod"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
