@@ -2,167 +2,165 @@
 
 ## Phase
 
-Phase 12 - Frontend activity page is implemented.
+Phase 13 - Frontend social and leaderboard pages are implemented.
 
 ## Completed work
 
-- Connected the Activity / Aktivite page to real backend activity endpoints:
-  - `GET /api/activities?date=YYYY-MM-DD`
-  - `POST /api/activities`
-  - `DELETE /api/activities/:activityId`
-  - `POST /api/activities/off-day`
-  - `POST /api/activities/workouts`
-  - `DELETE /api/activities/workouts/:workoutId`
-  - `POST /api/activities/water`
-  - `DELETE /api/activities/water/:waterLogId`
-- Added activity feature API client:
-  - `frontend/src/features/activity/api/activity.api.ts`
-- Added TanStack Query hooks:
-  - `useDailyActivity(date)`
-  - `useAddActivity()`
-  - `useDeleteActivity(date)`
-  - `useAddWorkout()`
-  - `useDeleteWorkout(date)`
-  - `useAddWaterLog()`
-  - `useDeleteWaterLog(date)`
-  - `useSetOffDay()`
-- Added Zod schemas for:
-  - activity entry
-  - workout session
-  - water log
-  - off-day state
-- Replaced the placeholder Activity page with real data rendering.
-- Added date selection; default date is today.
-- Added daily activity summary cards:
-  - Adım
-  - Koşu
-  - Yürüyüş
-  - Spor Süresi
-  - Yakılan Kalori
-  - Su
-  - Spor Günü
-  - Dinlenme Günü
-- Added forms and lists for:
-  - run/walk/steps/workout activity entries
-  - workout sessions
-  - water logs
-  - off-day/rest-day status
-- Mutations invalidate activity daily queries and dashboard queries so totals can refresh.
-- Added loading and error states:
-  - `ActivitySkeleton`
-  - `ErrorState` with Turkish copy
-- No backend code was changed.
-- No Prisma schema change was made.
-- Social, leaderboard, and challenges frontend pages were not implemented in this phase.
-- Health Connect, HealthKit, Strava, and other external integrations were not added.
+- Connected the Friends / Arkadaşlar page to the real social endpoints:
+  - `GET /api/users/search?q=...`
+  - `POST /api/follows/:userId`
+  - `DELETE /api/follows/:userId`
+  - `GET /api/follows/friends`
+  - `GET /api/follows/followers`
+  - `GET /api/follows/requests`
+  - `POST /api/follows/requests/:followId/accept`
+  - `POST /api/follows/requests/:followId/reject`
+  - `GET /api/users/:userId/public-profile`
+- Connected the Leaderboard / Liderlik Tablosu page to the real leaderboard endpoints:
+  - `POST /api/leaderboard/recalculate`
+  - `GET /api/leaderboard/weekly`
+  - `GET /api/leaderboard/monthly`
+  - `GET /api/leaderboard/friends?period=weekly`
+  - `GET /api/leaderboard/me/summary`
+- Added social feature:
+  - `social.api.ts` client and `social.types.ts` types.
+  - Hooks: `useUserSearch`, `useFollowUser`, `useUnfollowUser`, `useFriends`,
+    `useFollowers`, `useFollowRequests`, `useAcceptFollowRequest`,
+    `useRejectFollowRequest`, `usePublicProfile`.
+  - Components: `UserSearchPanel`, `UserSearchResultItem`, `FriendsList`,
+    `FriendListItem`, `FollowersList`, `FollowRequestsPanel`, `FollowRequestItem`,
+    `PublicProfileDialog`, `SocialSkeleton`.
+  - `FriendsPage` composes the panels (Kullanıcı Ara, Takip Ettiklerim, Takipçiler,
+    Gelen İstekler) and hosts the public-profile dialog.
+  - Debounced (350 ms) user search; empty/loading/error/empty-result states.
+- Added leaderboard feature:
+  - `leaderboard.api.ts` client and `leaderboard.types.ts` types.
+  - Hooks: `useWeeklyLeaderboard`, `useMonthlyLeaderboard`, `useFriendsLeaderboard`,
+    `useMyLeaderboardSummary`, `useRecalculateScore`.
+  - Components: `LeaderboardTabs`, `LeaderboardTable`, `LeaderboardRow`,
+    `MyLeaderboardSummary`, `PointsBreakdownCard`, `RecalculateScoreButton`,
+    `LeaderboardSkeleton`.
+  - `LeaderboardPage` composes the summary, tabs (Haftalık/Aylık/Arkadaşlar),
+    table and points breakdown. Monthly/friends tabs fetch lazily on selection.
+  - Current-user leaderboard row is highlighted using the id from the auth context.
+  - `RecalculateScoreButton` invalidates leaderboard and dashboard queries on success.
+- Added Turkish label utilities:
+  - `social-labels.ts` (privacy labels, initials, short date).
+  - `leaderboard-labels.ts` (point-source labels).
+- Public profile only renders safe fields (username, fullName, avatar, privacy) and
+  the optional stats the backend returns (weeklyScore, todayStepTotal, currentStreak).
+  Weight, birth date and other private data are never requested or shown.
+- No backend code was changed. No Prisma schema change was made.
+- Challenges, badges, and external integrations were not implemented.
 
-## Activity behavior decision
+## Social/leaderboard behavior notes
 
-The frontend uses only activity enum values accepted by the current backend schema:
-
-- `STEPS`
-- `WALK`
-- `RUN`
-- `WORKOUT`
-- `OFF_DAY`
-
-Prompt examples included values such as cycling, football, swimming, and home workout, but those are not present in the current Prisma/backend enum and would be rejected by the API.
+- `FollowStatus` enum values are `PENDING`, `ACCEPTED`, `BLOCKED` (rejecting a request
+  deletes it; there is no `REJECTED` value). The follow button reflects these states.
+- Friends leaderboard `period` defaults to `weekly`; the page requests `weekly`.
+- `recalculate` is called with an empty body (recalculates today).
+- Point sources include `AGGREGATE` plus the ten activity sources; all are translated.
 
 ## Changed files
 
-- `frontend/src/features/activity/api/activity.api.ts`
-- `frontend/src/features/activity/components/ActivityEntryForm.tsx`
-- `frontend/src/features/activity/components/ActivityEntryItem.tsx`
-- `frontend/src/features/activity/components/ActivityEntryList.tsx`
-- `frontend/src/features/activity/components/ActivitySkeleton.tsx`
-- `frontend/src/features/activity/components/DailyActivitySummary.tsx`
-- `frontend/src/features/activity/components/OffDayCard.tsx`
-- `frontend/src/features/activity/components/WaterLogForm.tsx`
-- `frontend/src/features/activity/components/WaterLogList.tsx`
-- `frontend/src/features/activity/components/WorkoutForm.tsx`
-- `frontend/src/features/activity/components/WorkoutItem.tsx`
-- `frontend/src/features/activity/components/WorkoutList.tsx`
-- `frontend/src/features/activity/hooks/useAddActivity.ts`
-- `frontend/src/features/activity/hooks/useAddWaterLog.ts`
-- `frontend/src/features/activity/hooks/useAddWorkout.ts`
-- `frontend/src/features/activity/hooks/useDailyActivity.ts`
-- `frontend/src/features/activity/hooks/useDeleteActivity.ts`
-- `frontend/src/features/activity/hooks/useDeleteWaterLog.ts`
-- `frontend/src/features/activity/hooks/useDeleteWorkout.ts`
-- `frontend/src/features/activity/hooks/useSetOffDay.ts`
-- `frontend/src/features/activity/pages/ActivityPage.tsx`
-- `frontend/src/features/activity/schemas/activity.schema.ts`
-- `frontend/src/features/activity/types/activity.types.ts`
-- `frontend/src/features/activity/utils/activity-labels.ts`
+New social files:
+
+- `frontend/src/features/social/api/social.api.ts`
+- `frontend/src/features/social/types/social.types.ts`
+- `frontend/src/features/social/utils/social-labels.ts`
+- `frontend/src/features/social/hooks/useUserSearch.ts`
+- `frontend/src/features/social/hooks/useFollowUser.ts`
+- `frontend/src/features/social/hooks/useUnfollowUser.ts`
+- `frontend/src/features/social/hooks/useFriends.ts`
+- `frontend/src/features/social/hooks/useFollowers.ts`
+- `frontend/src/features/social/hooks/useFollowRequests.ts`
+- `frontend/src/features/social/hooks/useAcceptFollowRequest.ts`
+- `frontend/src/features/social/hooks/useRejectFollowRequest.ts`
+- `frontend/src/features/social/hooks/usePublicProfile.ts`
+- `frontend/src/features/social/components/SocialSkeleton.tsx`
+- `frontend/src/features/social/components/UserSearchPanel.tsx`
+- `frontend/src/features/social/components/UserSearchResultItem.tsx`
+- `frontend/src/features/social/components/FriendsList.tsx`
+- `frontend/src/features/social/components/FriendListItem.tsx`
+- `frontend/src/features/social/components/FollowersList.tsx`
+- `frontend/src/features/social/components/FollowRequestsPanel.tsx`
+- `frontend/src/features/social/components/FollowRequestItem.tsx`
+- `frontend/src/features/social/components/PublicProfileDialog.tsx`
+- `frontend/src/features/social/pages/FriendsPage.tsx` (replaced placeholder)
+
+New leaderboard files:
+
+- `frontend/src/features/leaderboard/api/leaderboard.api.ts`
+- `frontend/src/features/leaderboard/types/leaderboard.types.ts`
+- `frontend/src/features/leaderboard/utils/leaderboard-labels.ts`
+- `frontend/src/features/leaderboard/hooks/useWeeklyLeaderboard.ts`
+- `frontend/src/features/leaderboard/hooks/useMonthlyLeaderboard.ts`
+- `frontend/src/features/leaderboard/hooks/useFriendsLeaderboard.ts`
+- `frontend/src/features/leaderboard/hooks/useMyLeaderboardSummary.ts`
+- `frontend/src/features/leaderboard/hooks/useRecalculateScore.ts`
+- `frontend/src/features/leaderboard/components/LeaderboardTabs.tsx`
+- `frontend/src/features/leaderboard/components/LeaderboardTable.tsx`
+- `frontend/src/features/leaderboard/components/LeaderboardRow.tsx`
+- `frontend/src/features/leaderboard/components/MyLeaderboardSummary.tsx`
+- `frontend/src/features/leaderboard/components/PointsBreakdownCard.tsx`
+- `frontend/src/features/leaderboard/components/RecalculateScoreButton.tsx`
+- `frontend/src/features/leaderboard/components/LeaderboardSkeleton.tsx`
+- `frontend/src/features/leaderboard/pages/LeaderboardPage.tsx` (replaced placeholder)
+
+Removed `.gitkeep` from now-populated social/leaderboard `api`, `components`,
+`hooks`, `types` and `utils` directories.
+
 - `docs/CURRENT_STATE.md`
-
-Removed `.gitkeep` files from populated activity folders:
-
-- `frontend/src/features/activity/api/.gitkeep`
-- `frontend/src/features/activity/components/.gitkeep`
-- `frontend/src/features/activity/hooks/.gitkeep`
-- `frontend/src/features/activity/schemas/.gitkeep`
-- `frontend/src/features/activity/types/.gitkeep`
-- `frontend/src/features/activity/utils/.gitkeep`
 
 ## Commands run
 
 ```bash
-npm run build
-npm run preview -- --host 127.0.0.1 --port 4183 --strictPort
+npm run build      # frontend: tsc -b && vite build (passed)
+npm run preview -- --port 4193 --strictPort   # route smoke check
+node dist/server.js   # backend started locally for live API verification
 ```
 
-Backend was started locally with `node dist/server.js` only when port `5000` was not already listening.
+## Social flow check results
 
-## Activity flow check results
+A scripted end-to-end run against the live backend (two fresh users A and B, each
+seeded with profile, active goal, steps and a recalculation) passed 21/21 checks:
 
-- `npm run build` passed.
-- Vite preview served the built frontend on port `4183`.
-- Preview route smoke checks returned HTTP 200:
-  - `/activity`
-  - `/login`
-- Backend health check passed:
-  - `GET /api/health`
-- A fresh test user was created through backend endpoints.
-- The test user was seeded with:
-  - profile
-  - active goal
-- Activity API flow passed:
-  - `GET /api/activities?date=2026-06-30` returned initial daily totals.
-  - Added RUN activity.
-  - Added WALK activity.
-  - Steps updated from `0` to `10000`.
-  - Run distance updated to `4.2`.
-  - Walk distance updated to `2`.
-  - Deleted WALK activity.
-  - Steps updated to `6000`.
-  - Added workout session.
-  - Workout count updated to `1`.
-  - Workout minutes updated to `75`.
-  - Deleted workout session.
-  - Workout count updated to `0`.
-  - Added water log.
-  - Water updated to `500`.
-  - Deleted water log.
-  - Water updated to `0`.
-  - Marked off day.
-  - Unmarked off day.
-  - `GET /api/dashboard/today?date=2026-06-30` reflected activity steps as `6000`.
-- Backend diff check showed no backend files changed.
-- `frontend/.env` remains ignored by Git.
-- File size check passed; largest activity file is `activity.types.ts` at 86 lines.
-- User-facing text in activity files was checked for mojibake patterns and passed.
+- `GET /users/search` returns the target user with `followStatus` and `privacyLevel`.
+- `POST /follows/:id` creates a `PENDING` follow (HTTP 201).
+- `GET /follows/requests` (B) lists A's pending request.
+- `POST .../accept` moves the follow to `ACCEPTED`.
+- `GET /follows/friends` (A) lists B with `followedAt`.
+- `GET /follows/followers` (B) lists A.
+- `GET /users/:id/public-profile` returns safe fields plus stats for a PUBLIC user
+  (`weeklyScore`, `todayStepTotal`) and does not include private fields.
+- `DELETE /follows/:id` returns `unfollowed: true`.
+- Preview route smoke checks returned HTTP 200 for `/friends` and `/login`.
+
+## Leaderboard flow check results
+
+From the same scripted run:
+
+- `POST /leaderboard/recalculate` returned a numeric `dailyScore` and `points` array.
+- `GET /leaderboard/weekly` and `/monthly` returned ranked rows with the expected
+  shape (`rank`, `totalScore`, `totalSteps`, `workoutDays`, `loggedDays`).
+- `GET /leaderboard/friends?period=weekly` returned rows including followed user B.
+- `GET /leaderboard/me/summary` returned `todayScore`, `weeklyScore`, `monthlyScore`,
+  ranks, `pointsBreakdown` and `currentStreak`; all point sources were known enum values.
+- Preview route smoke check returned HTTP 200 for `/leaderboard`.
 
 ## Known issues
 
-- Full browser automation is not installed in this workspace, so client-side redirect behavior was verified by code path and route smoke checks rather than a real browser automation run.
-- Vite still reports a chunk-size warning after build (`>500 kB` minified JS). The build succeeds; code splitting can be handled in a later optimization phase.
-- Activity page is connected to backend data, but social and leaderboard frontend pages are still placeholders by design.
-- `currentStreak` is still returned as `0` by the backend because streak calculation has not been implemented yet.
+- Full browser automation is not installed; client-side redirect/render behavior was
+  verified via route smoke checks and live API contract checks rather than a real browser.
+- Vite still reports a chunk-size warning (`>500 kB` JS). The build succeeds; code
+  splitting can be a later optimization.
+- `currentStreak` is still returned as `0` by the backend (streak calculation not yet
+  implemented). The UI shows it normally without referencing the backend gap.
+- Avatars render as username initials; image avatars are not part of the MVP yet.
 
 ## Current phase status
 
-Phase 12 (frontend activity page) is complete and builds successfully.
+Phase 13 (frontend social and leaderboard pages) is complete and builds successfully.
 
 ## Git commits
 
@@ -179,7 +177,9 @@ Phase 12 (frontend activity page) is complete and builds successfully.
 - `4519b4c feat: connect dashboard to backend data`
 - `2d085bc feat: connect nutrition page to backend`
 - `feat: connect activity page to backend`
+- `feat: connect social and leaderboard pages` (this phase)
 
 ## Next recommended step
 
-Review the activity tracking UI, then start the social frontend page only when explicitly requested.
+Review the social and leaderboard UI, then connect the Profile / Profil and
+Settings / Ayarlar pages to the backend (profile + goals editing) when explicitly requested.

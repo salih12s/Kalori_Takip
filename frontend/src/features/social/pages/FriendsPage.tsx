@@ -1,25 +1,31 @@
-import { Users } from "lucide-react";
+import { useState } from "react";
 
 import { PageShell } from "../../../components/layout/PageShell";
-import { EmptyState } from "../../../components/shared/EmptyState";
 import { PageHeader } from "../../../components/shared/PageHeader";
+import { FollowersList } from "../components/FollowersList";
+import { FollowRequestsPanel } from "../components/FollowRequestsPanel";
+import { FriendsList } from "../components/FriendsList";
+import { PublicProfileDialog } from "../components/PublicProfileDialog";
+import { UserSearchPanel } from "../components/UserSearchPanel";
 
-/**
- * Placeholder friends page. Follow/unfollow flows arrive in a later phase.
- */
 export function FriendsPage() {
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+
   return (
     <PageShell>
       <PageHeader
         title="Arkadaşlar"
-        description="Arkadaşlarını takip et ve gelişimlerini gör."
+        description="Arkadaşlarını takip et, istekleri yönet ve gelişimlerini gör."
       />
 
-      <EmptyState
-        icon={Users}
-        title="Henüz arkadaşın yok"
-        description="Arkadaşlarını bulup takip ettiğinde burada listelenecekler. Bu sayfa ileriki bir adımda aktif olacak."
-      />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <UserSearchPanel onViewProfile={setProfileUserId} />
+        <FollowRequestsPanel />
+        <FriendsList onViewProfile={setProfileUserId} />
+        <FollowersList onViewProfile={setProfileUserId} />
+      </div>
+
+      <PublicProfileDialog userId={profileUserId} onClose={() => setProfileUserId(null)} />
     </PageShell>
   );
 }
