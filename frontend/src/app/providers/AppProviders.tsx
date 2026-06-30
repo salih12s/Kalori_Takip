@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AppToaster } from "../../components/feedback/AppToaster";
+import { AuthProvider } from "./AuthProvider";
 import { QueryProvider } from "./QueryProvider";
 
 interface AppProvidersProps {
@@ -14,8 +15,10 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryProvider>
-      {children}
-      <AppToaster />
+      <AuthProvider>
+        {children}
+        <AppToaster />
+      </AuthProvider>
     </QueryProvider>
   );
 }

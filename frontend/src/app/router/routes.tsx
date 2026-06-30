@@ -11,6 +11,9 @@ import {
 
 /** Centralized route paths so links stay consistent across the app. */
 export const routePaths = {
+  login: "/login",
+  register: "/register",
+  onboarding: "/onboarding",
   dashboard: "/dashboard",
   nutrition: "/nutrition",
   activity: "/activity",

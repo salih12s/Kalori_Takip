@@ -2,124 +2,151 @@
 
 ## Phase
 
-Phase 8 - Frontend base layout and app shell is implemented.
+Phase 9 - Frontend auth and onboarding is implemented.
 
 ## Completed work
 
-- Built the frontend app shell and base layout (no backend or auth logic).
-- Added providers:
-  - `AppProviders` composes global providers.
-  - `QueryProvider` sets up a single TanStack Query client.
-- Added routing with `react-router-dom`:
-  - `AppRouter` renders all pages inside the shared `AppLayout`.
-  - `routes.tsx` holds `routePaths` and the shared `navItems` (Turkish labels + lucide icons).
-  - `/` redirects to `/dashboard`; unknown routes redirect to `/dashboard`.
-  - Routes: `/dashboard`, `/nutrition`, `/activity`, `/leaderboard`, `/friends`, `/profile`, `/settings`.
-- Added layout components:
-  - `AppLayout` (sidebar + header + content + mobile nav).
-  - `Sidebar` (desktop, fixed left, active-link highlight).
-  - `Header` (sticky top, mobile branding, placeholder avatar — no real auth state).
-  - `MobileNav` (fixed bottom, 7-column grid, no layout shift).
-  - `PageShell` (max-width content wrapper with consistent spacing).
-- Added shared components:
-  - `PageHeader`, `StatCard`, `EmptyState`, `LoadingState`, `ErrorState`.
-  - `AppToaster` (sonner) mounted once near the root.
-- Added 7 placeholder feature pages, each using `PageShell` + `PageHeader` + an
-  empty/placeholder state with Turkish copy:
-  - Dashboard, Yemek Günlüğü, Aktivite, Liderlik Tablosu, Arkadaşlar, Profil, Ayarlar.
-  - Dashboard also renders a responsive `StatCard` grid with neutral placeholder values
-    (`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4`).
-- Added API foundation (not used heavily yet):
-  - `services/http.ts` axios instance (base URL from env, JSON headers, request/response
-    interceptors with an auth-token placeholder).
-  - `lib/api.ts` thin typed wrapper over the axios instance.
-  - `lib/env.ts` centralizes `import.meta.env.VITE_API_URL` (default `http://localhost:5000/api`).
-  - `lib/cn.ts` `cn()` helper (clsx + tailwind-merge).
-  - `src/vite-env.d.ts` for typed `import.meta.env`.
-- Added `frontend/.env.example` with `VITE_API_URL`.
-- Removed redundant `.gitkeep` files from directories that now contain real files.
-- All required dependencies were already present in `frontend/package.json`
-  (react-router-dom, @tanstack/react-query, axios, lucide-react, motion, clsx,
-  tailwind-merge, sonner). Tailwind CSS v4 (`@tailwindcss/vite`) was preserved.
-- No backend code, Prisma schema, auth logic, or login/register forms were created.
-- No real backend data was wired into any page.
+- Implemented frontend authentication flow using the existing backend auth endpoints:
+  - `POST /api/auth/register`
+  - `POST /api/auth/login`
+  - `GET /api/auth/me`
+- Added `AuthProvider` with:
+  - current user
+  - token
+  - `isAuthenticated`
+  - `isLoading`
+  - `login`
+  - `register`
+  - `logout`
+  - `refreshCurrentUser`
+- Added localStorage token storage using the single key `fitboard_token`.
+- Updated the HTTP client to attach `Authorization: Bearer TOKEN` when a token exists.
+- Added simple 401 handling that clears the stored token.
+- Added auth routes:
+  - `/login`
+  - `/register`
+- Added onboarding route:
+  - `/onboarding`
+- Protected the app routes:
+  - `/dashboard`
+  - `/nutrition`
+  - `/activity`
+  - `/leaderboard`
+  - `/friends`
+  - `/profile`
+  - `/settings`
+- Added onboarding completion guard:
+  - If no active goal exists, authenticated users are routed to `/onboarding`.
+  - If an active goal exists, onboarding users are routed to `/dashboard`.
+- Added login and register forms with React Hook Form, Zod, TanStack Query mutation, and Turkish validation messages.
+- Added onboarding flow:
+  - Step 1: profile setup via `PUT /api/profile/me`
+  - Step 2: goal setup via `POST /api/goals`
+- Added header logout action with Turkish label `Çıkış Yap`.
+- Added `frontend/.env` locally with `VITE_API_URL="http://localhost:5000/api"` for testing; it is ignored by Git.
+- No backend code was changed.
+- No Prisma schema change was made.
+- No real dashboard, nutrition, activity, social, or leaderboard data wiring was implemented in this phase.
 
-## Pre-phase docs fix
+## Onboarding behavior decision
 
-- `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md` previously contained the Phase 0 setup
-  prompt. It now contains the correct "Update Current State Prompt" content.
+Onboarding status is intentionally simple:
+
+- `GET /api/goals/me` returning `null` means onboarding is incomplete.
+- An active goal means onboarding is complete.
+
+The backend `GoalType` enum currently supports:
+
+- `LOSE_WEIGHT`
+- `MAINTAIN_WEIGHT`
+- `GAIN_WEIGHT`
+- `IMPROVE_FITNESS`
+
+The frontend uses only these accepted values. `BUILD_MUSCLE` was not added because the backend schema would reject it.
 
 ## Changed files
 
-- `frontend/package.json` (dependencies already added for Phase 8)
+- `frontend/package.json`
 - `frontend/package-lock.json`
-- `frontend/.env.example` (new)
-- `frontend/src/vite-env.d.ts` (new)
-- `frontend/src/app/App.tsx`
-- `frontend/src/app/providers/AppProviders.tsx` (new)
-- `frontend/src/app/providers/QueryProvider.tsx` (new)
-- `frontend/src/app/router/AppRouter.tsx` (new)
-- `frontend/src/app/router/routes.tsx` (new)
-- `frontend/src/components/layout/AppLayout.tsx` (new)
-- `frontend/src/components/layout/Sidebar.tsx` (new)
-- `frontend/src/components/layout/Header.tsx` (new)
-- `frontend/src/components/layout/MobileNav.tsx` (new)
-- `frontend/src/components/layout/PageShell.tsx` (new)
-- `frontend/src/components/shared/PageHeader.tsx` (new)
-- `frontend/src/components/shared/StatCard.tsx` (new)
-- `frontend/src/components/shared/EmptyState.tsx` (new)
-- `frontend/src/components/shared/LoadingState.tsx` (new)
-- `frontend/src/components/shared/ErrorState.tsx` (new)
-- `frontend/src/components/feedback/AppToaster.tsx` (new)
-- `frontend/src/features/dashboard/pages/DashboardPage.tsx` (new)
-- `frontend/src/features/nutrition/pages/NutritionPage.tsx` (new)
-- `frontend/src/features/activity/pages/ActivityPage.tsx` (new)
-- `frontend/src/features/leaderboard/pages/LeaderboardPage.tsx` (new)
-- `frontend/src/features/social/pages/FriendsPage.tsx` (new)
-- `frontend/src/features/profile/pages/ProfilePage.tsx` (new)
-- `frontend/src/features/settings/pages/SettingsPage.tsx` (new)
-- Removed `.gitkeep` from the now-populated `lib`, `services`, `app/providers`,
-  `app/router`, `components/layout`, `components/shared`, `components/feedback`,
-  and each feature `pages/` directory.
-- `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md`
+- `frontend/src/app/providers/AppProviders.tsx`
+- `frontend/src/app/providers/AuthProvider.tsx`
+- `frontend/src/app/router/AppRouter.tsx`
+- `frontend/src/app/router/routes.tsx`
+- `frontend/src/components/layout/Header.tsx`
+- `frontend/src/components/shared/FormField.tsx`
+- `frontend/src/components/shared/FullScreenLoader.tsx`
+- `frontend/src/features/auth/api/auth.api.ts`
+- `frontend/src/features/auth/components/AuthLayout.tsx`
+- `frontend/src/features/auth/components/LoginForm.tsx`
+- `frontend/src/features/auth/components/ProtectedRoute.tsx`
+- `frontend/src/features/auth/components/RegisterForm.tsx`
+- `frontend/src/features/auth/hooks/useAuth.ts`
+- `frontend/src/features/auth/pages/LoginPage.tsx`
+- `frontend/src/features/auth/pages/RegisterPage.tsx`
+- `frontend/src/features/auth/schemas/auth.schema.ts`
+- `frontend/src/features/auth/types/auth.types.ts`
+- `frontend/src/features/auth/utils/auth-storage.ts`
+- `frontend/src/features/onboarding/api/onboarding.api.ts`
+- `frontend/src/features/onboarding/components/GoalStepForm.tsx`
+- `frontend/src/features/onboarding/components/OnboardingProgress.tsx`
+- `frontend/src/features/onboarding/components/ProfileStepForm.tsx`
+- `frontend/src/features/onboarding/hooks/useOnboarding.ts`
+- `frontend/src/features/onboarding/pages/OnboardingPage.tsx`
+- `frontend/src/features/onboarding/schemas/onboarding.schema.ts`
+- `frontend/src/features/onboarding/types/onboarding.types.ts`
+- `frontend/src/lib/api.ts`
+- `frontend/src/lib/ui.ts`
+- `frontend/src/services/http.ts`
 - `docs/CURRENT_STATE.md`
+
+Local ignored file:
+
+- `frontend/.env`
 
 ## Commands run
 
 ```bash
-npm run build      # frontend: tsc -b && vite build
-npm run preview    # vite preview smoke check on port 4173
+npm install react-hook-form zod @hookform/resolvers
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4180 --strictPort
 ```
 
-## Endpoint test results
+Backend was started locally with `node dist/server.js` only when port `5000` was not already listening.
 
-No backend endpoints were touched in Phase 8. Frontend UI/routing checks were run instead
-(see below).
+## UI / auth flow check results
 
-## UI / routing check results
-
-- `npm run build` passed: 2268 modules transformed, no TypeScript errors.
-- `vite preview` served the app: root returned HTTP 200 with the FitBoard `index.html`.
-- SPA fallback returned HTTP 200 for every route:
-  `/dashboard`, `/nutrition`, `/activity`, `/leaderboard`, `/friends`, `/profile`, `/settings`.
-- All user-facing UI text is Turkish; code, file names and comments are English.
-- Responsive classes are present (desktop sidebar `hidden lg:flex`, content `lg:pl-64`,
-  mobile nav `lg:hidden`, dashboard grid `grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4`).
-- All new files are within code-size limits (largest is `StatCard.tsx` at 65 lines).
+- `npm run build` passed.
+- Vite preview served the built frontend on port `4180`.
+- Frontend route smoke checks returned HTTP 200:
+  - `/login`
+  - `/register`
+  - `/onboarding`
+  - `/dashboard`
+- Backend health check passed:
+  - `GET /api/health`
+- Auth/onboarding API smoke flow passed:
+  - registered a fresh test user
+  - `GET /api/auth/me` returned the registered user
+  - `GET /api/goals/me` returned `null` before onboarding
+  - `PUT /api/profile/me` updated profile
+  - `POST /api/goals` created an active goal
+  - `POST /api/auth/login` succeeded
+  - `GET /api/goals/me` returned the active goal after login
+- Backend diff check showed no backend files changed.
+- `frontend/.env` is ignored by Git through the root `.gitignore`.
+- File size check passed; largest new form file is under 150 lines.
 
 ## Known issues
 
-- Pages are placeholders only; no real backend data is wired yet (by design for Phase 8).
-- Header avatar/user area and the notification bell are static placeholders; real auth
-  state is not implemented yet.
-- `lucide-react` is pinned at `^1.22.0` in this workspace; icons resolve and build fine.
-- `currentStreak` is still returned as `0` by the backend because streak calculation is
-  not implemented yet (carried over from Phase 7).
-- PowerShell on this machine does not support `&&`; commands were run separately.
+- Full browser automation is not installed in this workspace, so UI checks used build, preview route smoke tests, and backend API flow checks.
+- Vite reports a chunk-size warning after build (`>500 kB` minified JS). The build succeeds; code splitting can be handled in a later frontend optimization phase.
+- Existing placeholder app pages still do not load real dashboard/nutrition/activity/social/leaderboard data by design.
+- `currentStreak` is still returned as `0` by the backend because streak calculation has not been implemented yet.
+- Existing preview servers were already listening on ports `4173` and `4174`; Phase 9 smoke preview used strict port `4180`.
 
 ## Current phase status
 
-Phase 8 (frontend base layout and app shell) is complete and builds successfully.
+Phase 9 (frontend auth and onboarding) is complete and builds successfully.
 
 ## Git commits
 
@@ -131,9 +158,9 @@ Phase 8 (frontend base layout and app shell) is complete and builds successfully
 - `ba88747 feat: add activity backend module`
 - `84cb21f feat: add social follow backend module`
 - `7337d11 feat: add leaderboard backend module`
-- `feat: add frontend base layout` (this phase)
+- `a3bb68c feat: add frontend base layout`
+- `feat: add frontend auth and onboarding`
 
 ## Next recommended step
 
-Start Phase 9: wire authentication UI (login/register forms) and an auth provider,
-then connect the dashboard to real backend data. Begin only when explicitly requested.
+Review Phase 9 auth/onboarding behavior, then start real dashboard data wiring only when explicitly requested.

@@ -1,9 +1,17 @@
+import { isAxiosError } from "axios";
+
 import { http } from "../services/http";
+
+/** Standard backend response envelope: { success, message, data }. */
+export interface ApiResponse<TData> {
+  success: boolean;
+  message: string;
+  data?: TData;
+}
 
 /**
  * Thin, typed convenience wrapper over the shared axios instance.
- * Returns response data directly so feature hooks stay concise.
- * Not heavily used yet — Phase 8 only establishes the foundation.
+ * Returns the response body (the envelope) directly so callers can read `.data`.
  */
 export const api = {
   async get<TResponse>(url: string, params?: unknown): Promise<TResponse> {
@@ -27,3 +35,30 @@ export const api = {
     return data;
   },
 };
+
+/** Maps known backend (English) messages to Turkish user-facing copy. */
+const errorMessageMap: Record<string, string> = {
+  "Invalid email or password": "E-posta veya şifre hatalı.",
+  "Email is already in use": "Bu e-posta zaten kullanılıyor.",
+  "Username is already in use": "Bu kullanıcı adı zaten kullanılıyor.",
+  "User not found": "Kullanıcı bulunamadı.",
+};
+
+/**
+ * Extracts a Turkish, user-facing message from an API/network error.
+ */
+export function getApiErrorMessage(
+  error: unknown,
+  fallback = "Bir hata oluştu. Lütfen tekrar dene."
+): string {
+  if (isAxiosError(error)) {
+    if (!error.response) {
+      return "Sunucuya ulaşılamıyor. Lütfen bağlantını kontrol et.";
+    }
+    const backendMessage = (error.response.data as { message?: string } | undefined)?.message;
+    if (backendMessage) {
+      return errorMessageMap[backendMessage] ?? backendMessage;
+    }
+  }
+  return fallback;
+}
