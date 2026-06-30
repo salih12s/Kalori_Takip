@@ -30,6 +30,7 @@ export function AddFoodEntryDialog({ open, date, mealType, onClose }: AddFoodEnt
   const {
     register,
     reset,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<AddFoodEntryFormValues>({
@@ -39,7 +40,7 @@ export function AddFoodEntryDialog({ open, date, mealType, onClose }: AddFoodEnt
 
   useEffect(() => {
     if (selectedFood) {
-      reset({ quantity: "1", unit: selectedFood.servingUnit });
+      reset({ quantity: String(selectedFood.servingSize), unit: selectedFood.servingUnit });
     }
   }, [selectedFood, reset]);
 
@@ -52,6 +53,9 @@ export function AddFoodEntryDialog({ open, date, mealType, onClose }: AddFoodEnt
   }, [open, reset]);
 
   if (!open) return null;
+
+  const watchedQuantity = Number(watch("quantity"));
+  const watchedUnit = watch("unit");
 
   const onSubmit = (values: AddFoodEntryFormValues) => {
     if (!selectedFood?.id) {
@@ -105,7 +109,13 @@ export function AddFoodEntryDialog({ open, date, mealType, onClose }: AddFoodEnt
             <FoodSearchInput onSelect={setSelectedFood} />
           </FormField>
 
-          {selectedFood ? <SelectedFoodPreview food={selectedFood} /> : null}
+          {selectedFood ? (
+            <SelectedFoodPreview
+              food={selectedFood}
+              quantity={watchedQuantity}
+              unit={watchedUnit}
+            />
+          ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Miktar" htmlFor="quantity" error={errors.quantity?.message}>

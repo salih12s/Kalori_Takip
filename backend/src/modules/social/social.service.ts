@@ -1,6 +1,7 @@
 import { FollowStatus, PrivacyLevel } from "@prisma/client";
 
 import { AppError } from "../../shared/errors/app-error.js";
+import { realtimeService } from "../../realtime/realtime.service.js";
 import { startOfWeek, todayDateOnly } from "../../shared/utils/date.js";
 import { computeStreaks, type StreakSignalLog } from "../../shared/utils/streak.js";
 import {
@@ -43,7 +44,23 @@ export const socialService = {
       return { follow: toFollowResponse(existingFollow) };
     }
 
+    const currentUser = await socialRepository.findUserById(currentUserId);
+
+    if (!currentUser) {
+      throw new AppError("User not found", 404);
+    }
+
     const follow = await socialRepository.createPendingFollow(currentUserId, targetUserId);
+    realtimeService.emitFollowRequestReceived(targetUserId, {
+      followId: follow.id,
+      fromUser: {
+        userId: currentUser.id,
+        username: currentUser.username,
+        fullName: currentUser.profile?.fullName ?? null,
+        avatarUrl: currentUser.profile?.avatarUrl ?? null
+      },
+      createdAt: follow.createdAt
+    });
 
     return { follow: toFollowResponse(follow) };
   },
@@ -93,6 +110,20 @@ export const socialService = {
     }
 
     const acceptedFollow = await socialRepository.acceptFollow(followId);
+    const currentUser = await socialRepository.findUserById(currentUserId);
+
+    if (currentUser) {
+      realtimeService.emitFollowRequestAccepted(follow.followerId, {
+        followId: follow.id,
+        fromUser: {
+          userId: currentUser.id,
+          username: currentUser.username,
+          fullName: currentUser.profile?.fullName ?? null,
+          avatarUrl: currentUser.profile?.avatarUrl ?? null
+        },
+        createdAt: acceptedFollow.updatedAt
+      });
+    }
 
     return { follow: toFollowResponse(acceptedFollow) };
   },
@@ -105,6 +136,20 @@ export const socialService = {
     }
 
     await socialRepository.rejectFollow(followId);
+    const currentUser = await socialRepository.findUserById(currentUserId);
+
+    if (currentUser) {
+      realtimeService.emitFollowRequestRejected(follow.followerId, {
+        followId: follow.id,
+        fromUser: {
+          userId: currentUser.id,
+          username: currentUser.username,
+          fullName: currentUser.profile?.fullName ?? null,
+          avatarUrl: currentUser.profile?.avatarUrl ?? null
+        },
+        createdAt: new Date()
+      });
+    }
 
     return { rejected: true };
   },

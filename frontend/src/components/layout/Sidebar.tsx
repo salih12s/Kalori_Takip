@@ -1,7 +1,7 @@
-import { Flame } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { navItems } from "../../app/router/routes";
+import { AppLogo } from "../branding/AppLogo";
 import { cn } from "../../lib/cn";
 
 /**
@@ -11,10 +11,7 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-stone-200 bg-white lg:flex">
       <div className="flex h-16 items-center gap-2 border-b border-stone-200 px-6">
-        <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-600 text-white">
-          <Flame size={18} />
-        </span>
-        <span className="text-lg font-bold tracking-tight text-stone-900">FitBoard</span>
+        <AppLogo />
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -38,7 +35,7 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-stone-200 px-6 py-4">
-        <p className="text-xs text-stone-400">FitBoard · Sağlıklı rekabet</p>
+        <p className="text-xs text-stone-400">Saydam Fitness · Sağlıklı rekabet</p>
       </div>
     </aside>
   );

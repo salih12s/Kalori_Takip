@@ -5,9 +5,33 @@ import { getFoodEmoji } from "../utils/food-emoji";
 
 interface SelectedFoodPreviewProps {
   food: FoodSearchResult;
+  quantity: number;
+  unit: string;
 }
 
-export function SelectedFoodPreview({ food }: SelectedFoodPreviewProps) {
+function roundMacro(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function calculateScaledValue(value: number | null, factor: number): number | null {
+  return value == null ? null : roundMacro(value * factor);
+}
+
+export function SelectedFoodPreview({ food, quantity, unit }: SelectedFoodPreviewProps) {
+  const safeServingSize = food.servingSize > 0 ? food.servingSize : 1;
+  const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? quantity : safeServingSize;
+  const factor = safeQuantity / safeServingSize;
+  const calories = Math.round(food.calories * factor);
+  const protein = calculateScaledValue(food.protein, factor);
+  const carbs = calculateScaledValue(food.carbs, factor);
+  const fat = calculateScaledValue(food.fat, factor);
+  const fiber = calculateScaledValue(food.fiber, factor);
+  const sugar = calculateScaledValue(food.sugar, factor);
+  const hint =
+    unit.toLocaleLowerCase("tr-TR") === "g"
+      ? "Gram miktarını değiştirdiğinde kalori ve makrolar otomatik hesaplanır."
+      : "Adet miktarına göre değerler otomatik hesaplanır.";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -19,14 +43,20 @@ export function SelectedFoodPreview({ food }: SelectedFoodPreviewProps) {
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white text-xl">
           {getFoodEmoji(food.name)}
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-stone-900">{food.name}</h3>
-          <p className="mt-1 text-xs text-stone-600">
-            {food.servingSize} {food.servingUnit} · {food.calories} kcal
-          </p>
-          <p className="mt-1 text-xs text-stone-600">
-            Protein {food.protein}g · Karbonhidrat {food.carbs}g · Yağ {food.fat}g
-          </p>
+          <div className="mt-2 space-y-1 text-xs text-stone-700">
+            <p>
+              <strong>Porsiyon Değeri:</strong> {food.servingSize} {food.servingUnit} için {food.calories} kcal · Protein {food.protein}g · Karbonhidrat {food.carbs}g · Yağ {food.fat}g
+            </p>
+            <p>
+              <strong>Seçtiğin Miktar:</strong> {safeQuantity} {unit || food.servingUnit} = {calories} kcal · Protein {protein}g · Karbonhidrat {carbs}g · Yağ {fat}g
+            </p>
+            <p>
+              <strong>Lif:</strong> {fiber ?? 0}g · <strong>Şeker:</strong> {sugar ?? 0}g
+            </p>
+          </div>
+          <p className="mt-2 text-[11px] text-emerald-700">{hint}</p>
         </div>
       </div>
     </motion.div>

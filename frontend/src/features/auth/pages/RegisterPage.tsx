@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 
 import { routePaths } from "../../../app/router/routes";
@@ -5,7 +6,12 @@ import { RegisterForm } from "../components/RegisterForm";
 
 export function RegisterPage() {
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
+      className="space-y-6"
+    >
       <div className="space-y-1 text-center">
         <h1 className="text-xl font-bold text-stone-900">Kayıt Ol</h1>
         <p className="text-sm text-stone-500">Birkaç adımda hesabını oluştur ve takibe başla.</p>
@@ -22,6 +28,6 @@ export function RegisterPage() {
           Giriş yap
         </Link>
       </p>
-    </div>
+    </motion.div>
   );
 }

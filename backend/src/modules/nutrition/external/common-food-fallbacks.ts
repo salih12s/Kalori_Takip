@@ -196,6 +196,34 @@ const commonFoods: Record<string, ExternalFoodSearchResult> = {
     fiber: 10.6,
     sugar: 0.9,
     aliases: ["oats", "yulaf"]
+  },
+  "black olives": {
+    externalId: "openfoodfacts:common:black-olives",
+    provider: "OPEN_FOOD_FACTS",
+    name: "Siyah Zeytin",
+    servingSize: 100,
+    servingUnit: "g",
+    calories: 115,
+    protein: 0.8,
+    carbs: 6,
+    fat: 10.7,
+    fiber: 3.2,
+    sugar: 0,
+    aliases: ["black olives", "siyah zeytin"]
+  },
+  "green olives": {
+    externalId: "openfoodfacts:common:green-olives",
+    provider: "OPEN_FOOD_FACTS",
+    name: "Yeşil Zeytin",
+    servingSize: 100,
+    servingUnit: "g",
+    calories: 145,
+    protein: 1,
+    carbs: 3.8,
+    fat: 15.3,
+    fiber: 3.3,
+    sugar: 0.5,
+    aliases: ["green olives", "yeşil zeytin"]
   }
 };
 
