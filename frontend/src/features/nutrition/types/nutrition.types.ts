@@ -1,5 +1,7 @@
 export type MealType = "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
 export type FoodSource = "LOCAL" | "USER_CREATED" | "USDA" | "OPEN_FOOD_FACTS";
+export type FoodSearchSource = "all" | "local" | "external";
+export type FoodResultSource = "LOCAL" | "CACHED" | "EXTERNAL";
 
 export interface FoodResponse {
   id: string;
@@ -14,9 +16,34 @@ export interface FoodResponse {
   fiber: number | null;
   sugar: number | null;
   source: FoodSource;
+  externalProvider: string | null;
+  externalId: string | null;
   aliases: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FoodSearchResult {
+  id: string | null;
+  externalId: string | null;
+  provider: "OPEN_FOOD_FACTS" | null;
+  name: string;
+  servingSize: number;
+  servingUnit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number | null;
+  sugar: number | null;
+  source: FoodResultSource;
+  canAddDirectly: boolean;
+  canImport: boolean;
+}
+
+export interface FoodSearchResponse {
+  foods: FoodSearchResult[];
+  externalSearchFailed: boolean;
 }
 
 export interface FoodEntryResponse {
@@ -69,6 +96,21 @@ export interface CreateFoodPayload {
   fat: number;
   fiber?: number;
   sugar?: number;
+  aliases?: string[];
+}
+
+export interface ImportExternalFoodPayload {
+  externalId: string;
+  provider: "OPEN_FOOD_FACTS";
+  name: string;
+  servingSize: number;
+  servingUnit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber?: number | null;
+  sugar?: number | null;
   aliases?: string[];
 }
 

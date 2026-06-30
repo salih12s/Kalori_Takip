@@ -4,8 +4,10 @@ import { AppError } from "../../shared/errors/app-error.js";
 import { normalizeText } from "../../shared/utils/normalize-text.js";
 import {
   toDailyTotalsResponse,
+  toExternalFoodSearchResult,
   toFoodEntryResponse,
   toFoodResponse,
+  toLocalFoodSearchResult,
   toMealResponse
 } from "./nutrition.mapper.js";
 import { nutritionRepository } from "./nutrition.repository.js";
@@ -15,8 +17,12 @@ import type {
   DailyTotalsResponse,
   FoodEntryResponse,
   FoodResponse,
+  FoodSearchInput,
+  FoodSearchResult,
+  ImportExternalFoodInput,
   MealResponse
 } from "./nutrition.types.js";
+import { externalFoodProvider } from "./external/external-food.provider.js";
 
 type MealsResult = {
   dailyTotals: DailyTotalsResponse;
@@ -88,17 +94,49 @@ function groupMeals(meals: MealResponse[]): Record<MealType, MealResponse | null
 }
 
 export const nutritionService = {
-  async searchFoods(query: string): Promise<FoodResponse[]> {
+  async searchFoods(input: FoodSearchInput): Promise<FoodSearchResult> {
+    const query = input.q.trim();
     const normalizedQuery = normalizeText(query);
-    const foods = await nutritionRepository.searchFoods(query.trim(), normalizedQuery);
+    const shouldSearchLocal = input.source === "local" || input.source === "all";
+    const shouldSearchExternal = input.source === "external" || input.source === "all";
+    const [localFoods, externalResult] = await Promise.all([
+      shouldSearchLocal ? nutritionRepository.searchFoods(query, normalizedQuery) : Promise.resolve([]),
+      shouldSearchExternal ? externalFoodProvider.search(query) : Promise.resolve({ foods: [], failed: false })
+    ]);
+    const cachedExternalIds = new Set(
+      localFoods
+        .map((food) => food.externalId)
+        .filter((externalId): externalId is string => externalId !== null)
+    );
+    const externalFoods = externalResult.foods.filter((food) => !cachedExternalIds.has(food.externalId));
 
-    return foods.map(toFoodResponse);
+    return {
+      foods: [
+        ...localFoods.map(toLocalFoodSearchResult),
+        ...externalFoods.map(toExternalFoodSearchResult)
+      ].slice(0, 20),
+      externalSearchFailed: externalResult.failed
+    };
   },
 
   async createFood(userId: string, input: CreateFoodInput): Promise<FoodResponse> {
     const normalizedName = normalizeText(input.name);
     const aliases = uniqueAliases(input.aliases);
     const food = await nutritionRepository.createFood(userId, input, normalizedName, aliases);
+
+    return toFoodResponse(food);
+  },
+
+  async importExternalFood(userId: string, input: ImportExternalFoodInput): Promise<FoodResponse> {
+    const existingFood = await nutritionRepository.findImportedFood(input.provider, input.externalId);
+
+    if (existingFood) {
+      return toFoodResponse(existingFood);
+    }
+
+    const normalizedName = normalizeText(input.name);
+    const aliases = uniqueAliases(input.aliases);
+    const food = await nutritionRepository.importExternalFood(userId, input, normalizedName, aliases);
 
     return toFoodResponse(food);
   },

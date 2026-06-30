@@ -7,8 +7,26 @@ export const dateOnlySchema = z
   .transform((value) => new Date(`${value}T00:00:00.000Z`));
 
 export const foodSearchSchema = z.object({
-  q: z.string().trim().min(1).max(80)
+  q: z.string().trim().min(1).max(80),
+  source: z.enum(["all", "local", "external"]).optional().default("local")
 });
+
+export const importExternalFoodSchema = z
+  .object({
+    externalId: z.string().trim().min(1).max(160),
+    provider: z.literal("OPEN_FOOD_FACTS"),
+    name: z.string().trim().min(1).max(160),
+    servingSize: z.number().positive().max(10000),
+    servingUnit: z.string().trim().min(1).max(32),
+    calories: z.number().int().min(0).max(10000),
+    protein: z.number().min(0).max(1000),
+    carbs: z.number().min(0).max(1000),
+    fat: z.number().min(0).max(1000),
+    fiber: z.number().min(0).max(1000).nullable().optional(),
+    sugar: z.number().min(0).max(1000).nullable().optional(),
+    aliases: z.array(z.string().trim().min(1).max(160)).max(20).optional()
+  })
+  .strict();
 
 export const createFoodSchema = z
   .object({

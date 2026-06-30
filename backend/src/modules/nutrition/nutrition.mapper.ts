@@ -4,8 +4,10 @@ import type {
   DailyTotalsResponse,
   FoodEntryResponse,
   FoodResponse,
+  FoodSearchResultResponse,
   MealResponse
 } from "./nutrition.types.js";
+import type { ExternalFoodSearchResult } from "./external/external-food.types.js";
 
 type FoodWithAliases = Food & { aliases: FoodAlias[] };
 type MealWithEntries = Meal & { entries: FoodEntry[] };
@@ -24,9 +26,53 @@ export function toFoodResponse(food: FoodWithAliases): FoodResponse {
     fiber: food.fiber != null ? Number(food.fiber) : null,
     sugar: food.sugar != null ? Number(food.sugar) : null,
     source: food.source,
+    externalProvider: food.externalProvider,
+    externalId: food.externalId,
     aliases: food.aliases.map((alias) => alias.alias),
     createdAt: food.createdAt,
     updatedAt: food.updatedAt
+  };
+}
+
+export function toLocalFoodSearchResult(food: FoodWithAliases): FoodSearchResultResponse {
+  const isCached = food.source === "OPEN_FOOD_FACTS";
+
+  return {
+    id: food.id,
+    externalId: food.externalId,
+    provider: food.externalProvider === "OPEN_FOOD_FACTS" ? "OPEN_FOOD_FACTS" : null,
+    name: food.name,
+    servingSize: Number(food.servingSize),
+    servingUnit: food.servingUnit,
+    calories: food.calories,
+    protein: Number(food.protein),
+    carbs: Number(food.carbs),
+    fat: Number(food.fat),
+    fiber: food.fiber != null ? Number(food.fiber) : null,
+    sugar: food.sugar != null ? Number(food.sugar) : null,
+    source: isCached ? "CACHED" : "LOCAL",
+    canAddDirectly: true,
+    canImport: false
+  };
+}
+
+export function toExternalFoodSearchResult(food: ExternalFoodSearchResult): FoodSearchResultResponse {
+  return {
+    id: null,
+    externalId: food.externalId,
+    provider: food.provider,
+    name: food.name,
+    servingSize: food.servingSize,
+    servingUnit: food.servingUnit,
+    calories: food.calories,
+    protein: food.protein,
+    carbs: food.carbs,
+    fat: food.fat,
+    fiber: food.fiber,
+    sugar: food.sugar,
+    source: "EXTERNAL",
+    canAddDirectly: false,
+    canImport: true
   };
 }
 

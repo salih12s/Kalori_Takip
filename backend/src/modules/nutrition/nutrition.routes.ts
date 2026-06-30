@@ -6,6 +6,7 @@ import {
   createMealEntry,
   deleteMealEntry,
   getMeals,
+  importExternalFood,
   searchFoods
 } from "./nutrition.controller.js";
 
@@ -13,6 +14,7 @@ export const nutritionRoutes = Router();
 
 nutritionRoutes.get("/foods/search", authMiddleware, searchFoods);
 nutritionRoutes.post("/foods", authMiddleware, createFood);
+nutritionRoutes.post("/foods/import-external", authMiddleware, importExternalFood);
 nutritionRoutes.get("/meals", authMiddleware, getMeals);
 nutritionRoutes.post("/meals/entries", authMiddleware, createMealEntry);
 nutritionRoutes.delete("/meals/entries/:entryId", authMiddleware, deleteMealEntry);

@@ -2,51 +2,70 @@
 
 ## Phase
 
-Phase 16 - Badges, streaks and gamification is implemented.
+Phase 17 - External Food API + Cache is implemented.
 
 ## Completed work
 
-- Added backend gamification module mounted at `/api/gamification`.
-- Added default badge seeding and idempotent award recalculation.
-- Added current and longest streak calculation from existing `DailyLog` signals.
-- Added earned badge listing, all-badge listing with earned flags, and user gamification summary.
-- Added real `currentStreak` to leaderboard summary and social public profile responses.
-- Added frontend `/badges` page, API layer, hooks, route and nav item labelled `Rozetler`.
-- No frontend auth/dashboard/nutrition/activity/social/leaderboard redesign was started.
-- No external integrations, notifications, image upload, barcode scanner or AI food recognition were added.
+- Extended existing nutrition search with optional source filtering:
+  - `GET /api/foods/search?q=...`
+  - `GET /api/foods/search?q=...&source=local`
+  - `GET /api/foods/search?q=...&source=external`
+  - `GET /api/foods/search?q=...&source=all`
+- Kept the safest backward-compatible default: missing `source` uses `local`.
+- Added Open Food Facts external search through a small provider layer.
+- Added explicit external food import/cache endpoint:
+  - `POST /api/foods/import-external`
+- Imported external foods are stored in the existing `Food` table and can be used by the existing meal entry endpoint.
+- Duplicate imports are prevented by provider + external id cache lookup and database uniqueness.
+- Existing local food creation, local search, meal entry creation, meal deletion and daily total recalculation still work.
+- Updated nutrition UI search to support:
+  - `Tümü`
+  - `Yerel`
+  - `Dış Kaynak`
+  - `Önbellekte`
+  - `İçe Aktar`
+  - `Eklenebilir`
+- External results must be imported explicitly before adding to a meal.
+- No barcode scanner, AI image recognition, paid API, Health Connect, HealthKit or Strava work was added.
 
 ## Schema changes
 
 Additive Prisma migration:
 
-- `backend/prisma/migrations/20260630022312_add_badges/migration.sql`
-- New enums: `BadgeCategory`, `BadgeTriggerType`.
-- New models: `Badge`, `UserBadge`.
-- Added `User.badges` relation.
+- `backend/prisma/migrations/20260630123000_add_external_food_cache/migration.sql`
 
-The migration is additive only. Existing challenge, nutrition, activity, social and leaderboard tables were preserved.
+Food model additions:
+
+- `externalProvider String?`
+- `cachedAt DateTime?`
+- `@@index([externalProvider, externalId])`
+- `@@unique([externalProvider, externalId])`
+
+Existing `Food.source` and `Food.externalId` fields were preserved. Existing local foods are not modified.
 
 ## Changed files
 
 Backend:
 
 - `backend/prisma/schema.prisma`
-- `backend/prisma/migrations/20260630022312_add_badges/migration.sql`
-- `backend/src/app.ts`
-- `backend/src/shared/utils/streak.ts`
-- `backend/src/modules/gamification/`
-- `backend/src/modules/leaderboard/leaderboard.repository.ts`
-- `backend/src/modules/leaderboard/leaderboard.service.ts`
-- `backend/src/modules/social/social.mapper.ts`
-- `backend/src/modules/social/social.repository.ts`
-- `backend/src/modules/social/social.service.ts`
+- `backend/prisma/migrations/20260630123000_add_external_food_cache/migration.sql`
+- `backend/src/modules/nutrition/nutrition.routes.ts`
+- `backend/src/modules/nutrition/nutrition.controller.ts`
+- `backend/src/modules/nutrition/nutrition.service.ts`
+- `backend/src/modules/nutrition/nutrition.repository.ts`
+- `backend/src/modules/nutrition/nutrition.validation.ts`
+- `backend/src/modules/nutrition/nutrition.types.ts`
+- `backend/src/modules/nutrition/nutrition.mapper.ts`
+- `backend/src/modules/nutrition/external/`
 
 Frontend:
 
-- `frontend/src/features/gamification/`
-- `frontend/src/app/router/routes.tsx`
-- `frontend/src/app/router/AppRouter.tsx`
-- `frontend/src/components/layout/MobileNav.tsx`
+- `frontend/src/features/nutrition/api/nutrition.api.ts`
+- `frontend/src/features/nutrition/hooks/useFoodSearch.ts`
+- `frontend/src/features/nutrition/hooks/useImportExternalFood.ts`
+- `frontend/src/features/nutrition/components/FoodSearchInput.tsx`
+- `frontend/src/features/nutrition/components/AddFoodEntryDialog.tsx`
+- `frontend/src/features/nutrition/types/nutrition.types.ts`
 
 Docs:
 
@@ -55,64 +74,75 @@ Docs:
 ## Commands run
 
 ```bash
-npm run prisma:migrate -- --name add_badges
+npx prisma format
+npm run prisma:migrate -- --name add_external_food_cache
+npx prisma migrate deploy
 npm run prisma:generate
+npm run build
+npm run build
 npx prisma migrate status
-npm run build
-npm run build
-npm run preview -- --host 127.0.0.1 --port 4196 --strictPort
+npm run preview -- --host 127.0.0.1 --port 4197 --strictPort
+git diff --check
 ```
 
-Backend and frontend `npm run build` both passed.
+Notes:
 
-## Backend gamification check results
+- `npm run prisma:migrate -- --name add_external_food_cache` stopped because Prisma Migrate refuses a non-interactive unique-constraint warning in this environment.
+- The migration SQL was added manually and applied successfully with `npx prisma migrate deploy`.
+- `npx prisma migrate status` reports the database schema is up to date.
+
+## Backend external food check results
 
 Live backend smoke test passed:
 
 - `GET /api/health` returned success.
-- Unauthenticated `GET /api/gamification/me/summary` returned 401.
-- Created a fresh user, friend, goal, food, meal entry, 7 active days, run activity, workout, water logs and a completed challenge.
-- `POST /api/gamification/recalculate` awarded 13 badges on first run.
-- A second `POST /api/gamification/recalculate` awarded 0 new badges, confirming idempotency.
-- `GET /api/gamification/badges` returned 13 badges with earned flags.
-- `GET /api/gamification/me/badges` returned 13 earned badges.
-- `GET /api/gamification/me/summary` returned:
-  - `currentStreak = 7`
-  - `longestStreak = 7`
-  - `activeDaysThisWeek = 2`
-  - `todayScore = 71`
-- Completed challenge membership status was `COMPLETED`.
-- `GET /api/leaderboard/me/summary` returned `currentStreak = 7`.
-- `GET /api/users/:userId/public-profile` returned `currentStreak = 7`.
+- Unauthenticated food search returned 401.
+- Unauthenticated external import returned 401.
+- Local food creation still works.
+- Default local food search still returns local results.
+- `source=all` search returned local + external-compatible response shape.
+- `source=external` searched Open Food Facts successfully and returned 9 mapped results during the smoke test.
+- `POST /api/foods/import-external` created a cached `Food`.
+- Importing the same provider + external id twice returned the same cached food id.
+- Imported food was added through `POST /api/meals/entries`.
+- Daily totals updated after add.
+- `DELETE /api/meals/entries/:entryId` still recalculated totals back to 0.
 
-## Frontend gamification check results
+## Frontend nutrition check results
 
 - `npm run build` passed with no TypeScript errors.
-- Preview route smoke returned HTTP 200 for `/badges` and `/`.
-- `/badges` is registered inside the protected app shell.
-- Sidebar/mobile navigation includes the Turkish label `Rozetler`.
-- User-facing gamification text is Turkish.
+- Preview route smoke returned HTTP 200 for `/nutrition` and `/`.
+- Nutrition search source filter appears in the UI source:
+  - `Tümü`
+  - `Yerel`
+  - `Dış Kaynak`
+  - `Önbellekte`
+  - `İçe Aktar`
+- Local/cached results can be selected directly.
+- External results show an import button and are selected after successful import.
+- User-facing text added in this phase is Turkish.
 
 ## Known issues
 
-- Vite still reports the existing large chunk warning after production build. Build succeeds; route-level code splitting can be a later optimization.
-- Full browser automation is still not installed; frontend was verified with TypeScript build and Vite preview route smoke.
-- Test smoke data was created in the local development database.
+- Vite still reports the existing large chunk warning after production build. Build succeeds.
+- Full browser automation is not installed; frontend verification used TypeScript build, Vite preview route smoke and source checks.
+- External food search depends on Open Food Facts availability. If it fails, the backend returns local results and `externalSearchFailed: true` rather than failing the whole search.
+- Smoke tests added local development database rows.
 
 ## Current phase status
 
-Phase 16 is complete and ready to commit.
+Phase 17 is complete and ready to commit.
 
 ## Git commits
 
 Latest committed work before this phase:
 
-- `8c7e9a1 feat: add challenges feature`
+- `1df1c87 feat: add badges and streak gamification`
 
 Next commit:
 
-- `feat: add badges and streak gamification`
+- `feat: add external food search cache`
 
 ## Next recommended step
 
-Start the next requested phase only after this checkpoint is committed. A good next product step is dashboard gamification surfacing or notification planning, but not until explicitly requested.
+Commit Phase 17, then only start the next explicitly requested phase.

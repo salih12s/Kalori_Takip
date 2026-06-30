@@ -5,17 +5,25 @@ import type {
   CreateFoodPayload,
   DailyMealsResponse,
   DailyTotalsResponse,
+  FoodSearchResponse,
+  FoodSearchSource,
   FoodResponse,
+  ImportExternalFoodPayload,
 } from "../types/nutrition.types";
 
 export const nutritionApi = {
-  async searchFoods(query: string): Promise<FoodResponse[]> {
-    const res = await api.get<ApiResponse<{ foods: FoodResponse[] }>>("/foods/search", { q: query });
-    return res.data?.foods ?? [];
+  async searchFoods(query: string, source: FoodSearchSource): Promise<FoodSearchResponse> {
+    const res = await api.get<ApiResponse<FoodSearchResponse>>("/foods/search", { q: query, source });
+    return res.data ?? { foods: [], externalSearchFailed: false };
   },
 
   async createFood(payload: CreateFoodPayload): Promise<FoodResponse> {
     const res = await api.post<ApiResponse<{ food: FoodResponse }>>("/foods", payload);
+    return (res.data as { food: FoodResponse }).food;
+  },
+
+  async importExternalFood(payload: ImportExternalFoodPayload): Promise<FoodResponse> {
+    const res = await api.post<ApiResponse<{ food: FoodResponse }>>("/foods/import-external", payload);
     return (res.data as { food: FoodResponse }).food;
   },
 

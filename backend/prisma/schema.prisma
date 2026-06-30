@@ -236,33 +236,37 @@ model DailyLog {
 }
 
 model Food {
-  id             String      @id @default(uuid()) @db.Uuid
-  userId         String?     @db.Uuid
-  name           String
-  normalizedName String      @default("")
-  brand          String?
-  barcode        String?
-  servingSize    Decimal     @default(100) @db.Decimal(8, 2)
-  servingUnit    String      @default("g")
-  calories       Int
-  protein        Decimal     @default(0) @db.Decimal(8, 2)
-  carbs          Decimal     @default(0) @db.Decimal(8, 2)
-  fat            Decimal     @default(0) @db.Decimal(8, 2)
-  fiber          Decimal?    @db.Decimal(8, 2)
-  sugar          Decimal?    @db.Decimal(8, 2)
-  source         FoodSource  @default(LOCAL)
-  externalId     String?
-  deletedAt      DateTime?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  user           User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  aliases        FoodAlias[]
-  entries        FoodEntry[]
+  id               String      @id @default(uuid()) @db.Uuid
+  userId           String?     @db.Uuid
+  name             String
+  normalizedName   String      @default("")
+  brand            String?
+  barcode          String?
+  servingSize      Decimal     @default(100) @db.Decimal(8, 2)
+  servingUnit      String      @default("g")
+  calories         Int
+  protein          Decimal     @default(0) @db.Decimal(8, 2)
+  carbs            Decimal     @default(0) @db.Decimal(8, 2)
+  fat              Decimal     @default(0) @db.Decimal(8, 2)
+  fiber            Decimal?    @db.Decimal(8, 2)
+  sugar            Decimal?    @db.Decimal(8, 2)
+  source           FoodSource  @default(LOCAL)
+  externalProvider String?
+  externalId       String?
+  cachedAt         DateTime?
+  deletedAt        DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  user             User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  aliases          FoodAlias[]
+  entries          FoodEntry[]
 
+  @@unique([externalProvider, externalId])
   @@index([name])
   @@index([normalizedName])
   @@index([barcode])
   @@index([userId])
+  @@index([externalProvider, externalId])
   @@index([deletedAt])
 }
 

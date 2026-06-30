@@ -1,7 +1,7 @@
 import { MealType, Prisma } from "@prisma/client";
 
 import { prisma } from "../../database/prisma.js";
-import type { CreateFoodInput } from "./nutrition.types.js";
+import type { CreateFoodInput, ImportExternalFoodInput } from "./nutrition.types.js";
 
 const mealTypes = [MealType.BREAKFAST, MealType.LUNCH, MealType.DINNER, MealType.SNACK];
 
@@ -51,6 +51,44 @@ export const nutritionRepository = {
         fiber: input.fiber,
         sugar: input.sugar,
         source: "USER_CREATED",
+        aliases: {
+          create: aliases
+        }
+      },
+      include: { aliases: true }
+    });
+  },
+
+  findImportedFood(provider: string, externalId: string) {
+    return prisma.food.findFirst({
+      where: { externalProvider: provider, externalId, deletedAt: null },
+      include: { aliases: true }
+    });
+  },
+
+  importExternalFood(
+    userId: string,
+    input: ImportExternalFoodInput,
+    normalizedName: string,
+    aliases: { alias: string; normalizedAlias: string }[]
+  ) {
+    return prisma.food.create({
+      data: {
+        userId,
+        name: input.name,
+        normalizedName,
+        servingSize: input.servingSize,
+        servingUnit: input.servingUnit,
+        calories: input.calories,
+        protein: input.protein,
+        carbs: input.carbs,
+        fat: input.fat,
+        fiber: input.fiber ?? null,
+        sugar: input.sugar ?? null,
+        source: "OPEN_FOOD_FACTS",
+        externalProvider: input.provider,
+        externalId: input.externalId,
+        cachedAt: new Date(),
         aliases: {
           create: aliases
         }

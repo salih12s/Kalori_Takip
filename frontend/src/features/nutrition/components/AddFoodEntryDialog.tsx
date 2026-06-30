@@ -9,7 +9,7 @@ import { getApiErrorMessage } from "../../../lib/api";
 import { inputClassName, primaryButtonClassName, secondaryButtonClassName } from "../../../lib/ui";
 import { useAddFoodEntry } from "../hooks/useAddFoodEntry";
 import { addFoodEntrySchema, type AddFoodEntryFormValues } from "../schemas/nutrition.schema";
-import type { FoodResponse, MealType } from "../types/nutrition.types";
+import type { FoodSearchResult, MealType } from "../types/nutrition.types";
 import { mealLabels } from "../utils/meal-labels";
 import { FoodSearchInput } from "./FoodSearchInput";
 
@@ -21,7 +21,7 @@ interface AddFoodEntryDialogProps {
 }
 
 export function AddFoodEntryDialog({ open, date, mealType, onClose }: AddFoodEntryDialogProps) {
-  const [selectedFood, setSelectedFood] = useState<FoodResponse | null>(null);
+  const [selectedFood, setSelectedFood] = useState<FoodSearchResult | null>(null);
   const addMutation = useAddFoodEntry();
   const {
     register,
@@ -49,7 +49,7 @@ export function AddFoodEntryDialog({ open, date, mealType, onClose }: AddFoodEnt
   if (!open) return null;
 
   const onSubmit = (values: AddFoodEntryFormValues) => {
-    if (!selectedFood) {
+    if (!selectedFood?.id) {
       toast.error("Lütfen bir yemek seç.");
       return;
     }

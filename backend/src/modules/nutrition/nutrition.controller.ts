@@ -6,14 +6,15 @@ import {
   createMealEntrySchema,
   deleteMealEntryParamsSchema,
   foodSearchSchema,
-  getMealsSchema
+  getMealsSchema,
+  importExternalFoodSchema
 } from "./nutrition.validation.js";
 
 export const searchFoods = asyncHandler(async (req, res) => {
   const input = foodSearchSchema.parse(req.query);
-  const foods = await nutritionService.searchFoods(input.q);
+  const result = await nutritionService.searchFoods(input);
 
-  return res.json(successResponse("Foods retrieved successfully", { foods }));
+  return res.json(successResponse("Foods retrieved successfully", result));
 });
 
 export const createFood = asyncHandler(async (req, res) => {
@@ -21,6 +22,13 @@ export const createFood = asyncHandler(async (req, res) => {
   const food = await nutritionService.createFood(req.user!.id, input);
 
   return res.status(201).json(successResponse("Food created successfully", { food }));
+});
+
+export const importExternalFood = asyncHandler(async (req, res) => {
+  const input = importExternalFoodSchema.parse(req.body);
+  const food = await nutritionService.importExternalFood(req.user!.id, input);
+
+  return res.status(201).json(successResponse("External food imported successfully", { food }));
 });
 
 export const getMeals = asyncHandler(async (req, res) => {
