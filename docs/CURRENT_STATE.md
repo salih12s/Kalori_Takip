@@ -2,116 +2,124 @@
 
 ## Phase
 
-Phase 7 - Leaderboard backend is implemented.
+Phase 8 - Frontend base layout and app shell is implemented.
 
 ## Completed work
 
-- Implemented protected leaderboard backend endpoints:
-  - `POST /api/leaderboard/recalculate`
-  - `POST /api/leaderboard/recalculate-range`
-  - `GET /api/leaderboard/weekly?startDate=YYYY-MM-DD`
-  - `GET /api/leaderboard/monthly?month=YYYY-MM`
-  - `GET /api/leaderboard/friends?period=weekly|monthly`
-  - `GET /api/leaderboard/me/summary`
-- Added leaderboard module with routes, controller, service, repository, validation, types, and mapper.
-- Mounted leaderboard routes in `backend/src/app.ts`.
-- Added daily per-source leaderboard point storage:
-  - `LeaderboardPeriod.DAILY`
-  - `LeaderboardPointSource`
-  - `LeaderboardPoint.source`
-  - unique daily source rows per user/date/source.
-- Preserved existing aggregate leaderboard rows by defaulting existing rows to `AGGREGATE`.
-- Updated `DailyLog.dailyScore` during recalculation.
-- No frontend UI was created or changed.
-- No dashboard, challenge, badge, notification, external integration, barcode, or AI food recognition work was started.
+- Built the frontend app shell and base layout (no backend or auth logic).
+- Added providers:
+  - `AppProviders` composes global providers.
+  - `QueryProvider` sets up a single TanStack Query client.
+- Added routing with `react-router-dom`:
+  - `AppRouter` renders all pages inside the shared `AppLayout`.
+  - `routes.tsx` holds `routePaths` and the shared `navItems` (Turkish labels + lucide icons).
+  - `/` redirects to `/dashboard`; unknown routes redirect to `/dashboard`.
+  - Routes: `/dashboard`, `/nutrition`, `/activity`, `/leaderboard`, `/friends`, `/profile`, `/settings`.
+- Added layout components:
+  - `AppLayout` (sidebar + header + content + mobile nav).
+  - `Sidebar` (desktop, fixed left, active-link highlight).
+  - `Header` (sticky top, mobile branding, placeholder avatar — no real auth state).
+  - `MobileNav` (fixed bottom, 7-column grid, no layout shift).
+  - `PageShell` (max-width content wrapper with consistent spacing).
+- Added shared components:
+  - `PageHeader`, `StatCard`, `EmptyState`, `LoadingState`, `ErrorState`.
+  - `AppToaster` (sonner) mounted once near the root.
+- Added 7 placeholder feature pages, each using `PageShell` + `PageHeader` + an
+  empty/placeholder state with Turkish copy:
+  - Dashboard, Yemek Günlüğü, Aktivite, Liderlik Tablosu, Arkadaşlar, Profil, Ayarlar.
+  - Dashboard also renders a responsive `StatCard` grid with neutral placeholder values
+    (`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4`).
+- Added API foundation (not used heavily yet):
+  - `services/http.ts` axios instance (base URL from env, JSON headers, request/response
+    interceptors with an auth-token placeholder).
+  - `lib/api.ts` thin typed wrapper over the axios instance.
+  - `lib/env.ts` centralizes `import.meta.env.VITE_API_URL` (default `http://localhost:5000/api`).
+  - `lib/cn.ts` `cn()` helper (clsx + tailwind-merge).
+  - `src/vite-env.d.ts` for typed `import.meta.env`.
+- Added `frontend/.env.example` with `VITE_API_URL`.
+- Removed redundant `.gitkeep` files from directories that now contain real files.
+- All required dependencies were already present in `frontend/package.json`
+  (react-router-dom, @tanstack/react-query, axios, lucide-react, motion, clsx,
+  tailwind-merge, sonner). Tailwind CSS v4 (`@tailwindcss/vite`) was preserved.
+- No backend code, Prisma schema, auth logic, or login/register forms were created.
+- No real backend data was wired into any page.
 
-## Scoring behavior decision
+## Pre-phase docs fix
 
-Leaderboard scoring rewards healthy consistency instead of lowest calorie intake.
-
-- Food logged: +5
-- Calorie goal range: +10 only when an active goal exists and calories are within 80%-110% of the goal
-- Protein goal: +8 only when an active goal exists and protein goal is reached
-- Step goal: +10 only when an active goal exists and step goal is reached
-- Workout: +15
-- Run distance: +3 per full km
-- Walk distance: +3 per full km
-- Off day: +3
-- Water logged: +3
-- Daily completion: +5 when food and at least one activity/water/workout/off-day signal exist
-
-Goal-based points are skipped when no active goal exists. Very low calories below 80% of the active calorie goal do not receive calorie-goal points.
+- `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md` previously contained the Phase 0 setup
+  prompt. It now contains the correct "Update Current State Prompt" content.
 
 ## Changed files
 
-- `backend/prisma/schema.prisma`
-- `backend/prisma/migrations/20260630120000_add_leaderboard_sources/migration.sql`
-- `backend/src/app.ts`
-- `backend/src/modules/leaderboard/leaderboard.routes.ts`
-- `backend/src/modules/leaderboard/leaderboard.controller.ts`
-- `backend/src/modules/leaderboard/leaderboard.service.ts`
-- `backend/src/modules/leaderboard/leaderboard.repository.ts`
-- `backend/src/modules/leaderboard/leaderboard.validation.ts`
-- `backend/src/modules/leaderboard/leaderboard.types.ts`
-- `backend/src/modules/leaderboard/leaderboard.mapper.ts`
+- `frontend/package.json` (dependencies already added for Phase 8)
+- `frontend/package-lock.json`
+- `frontend/.env.example` (new)
+- `frontend/src/vite-env.d.ts` (new)
+- `frontend/src/app/App.tsx`
+- `frontend/src/app/providers/AppProviders.tsx` (new)
+- `frontend/src/app/providers/QueryProvider.tsx` (new)
+- `frontend/src/app/router/AppRouter.tsx` (new)
+- `frontend/src/app/router/routes.tsx` (new)
+- `frontend/src/components/layout/AppLayout.tsx` (new)
+- `frontend/src/components/layout/Sidebar.tsx` (new)
+- `frontend/src/components/layout/Header.tsx` (new)
+- `frontend/src/components/layout/MobileNav.tsx` (new)
+- `frontend/src/components/layout/PageShell.tsx` (new)
+- `frontend/src/components/shared/PageHeader.tsx` (new)
+- `frontend/src/components/shared/StatCard.tsx` (new)
+- `frontend/src/components/shared/EmptyState.tsx` (new)
+- `frontend/src/components/shared/LoadingState.tsx` (new)
+- `frontend/src/components/shared/ErrorState.tsx` (new)
+- `frontend/src/components/feedback/AppToaster.tsx` (new)
+- `frontend/src/features/dashboard/pages/DashboardPage.tsx` (new)
+- `frontend/src/features/nutrition/pages/NutritionPage.tsx` (new)
+- `frontend/src/features/activity/pages/ActivityPage.tsx` (new)
+- `frontend/src/features/leaderboard/pages/LeaderboardPage.tsx` (new)
+- `frontend/src/features/social/pages/FriendsPage.tsx` (new)
+- `frontend/src/features/profile/pages/ProfilePage.tsx` (new)
+- `frontend/src/features/settings/pages/SettingsPage.tsx` (new)
+- Removed `.gitkeep` from the now-populated `lib`, `services`, `app/providers`,
+  `app/router`, `components/layout`, `components/shared`, `components/feedback`,
+  and each feature `pages/` directory.
+- `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md`
 - `docs/CURRENT_STATE.md`
 
 ## Commands run
 
 ```bash
-npx prisma format
-npm run prisma:migrate -- --name add_leaderboard_sources
-npx prisma migrate deploy
-npm run prisma:generate
-npm run build
-npm run prisma:migrate -- --name add_leaderboard_sources_check
+npm run build      # frontend: tsc -b && vite build
+npm run preview    # vite preview smoke check on port 4173
 ```
-
-The first `npm run prisma:migrate -- --name add_leaderboard_sources` generated a non-interactive Prisma warning because the unique index change required confirmation. A deterministic migration file was created and applied with `npx prisma migrate deploy`, then `npm run prisma:migrate -- --name add_leaderboard_sources_check` confirmed the database was in sync.
-
-Endpoint tests were run against the compiled backend with PowerShell `Invoke-RestMethod`.
 
 ## Endpoint test results
 
-- `GET /api/health`: passed.
-- Created fresh User A, User B, and User C with auth register.
-- `POST /api/auth/login`: passed for User A.
-- `GET /api/auth/me`: passed for User A.
-- Created profiles and active goals for test users.
-- User A followed User B; User B accepted the request.
-- Created food and meal entries for User A, User B, and User C.
-- Created run, walk, workout, water, and off-day data for User A.
-- `POST /api/leaderboard/recalculate` for User A:
-  - returned `dailyScore: 67`
-  - returned 9 point items
-  - did not include `CALORIE_GOAL` because calories were below 80% of the active goal.
-- Repeating `POST /api/leaderboard/recalculate` for User A:
-  - returned the same score and point count, confirming idempotency.
-- `POST /api/leaderboard/recalculate` for User B:
-  - returned `dailyScore: 41`.
-- `POST /api/leaderboard/recalculate` for User C:
-  - returned `dailyScore: 62`.
-- `POST /api/leaderboard/recalculate-range` for User A:
-  - returned 1 recalculated day for the one-day range.
-- `GET /api/leaderboard/weekly?startDate=2026-06-29` as User A:
-  - returned User A and accepted friend User B.
-  - excluded unfollowed private User C.
-- `GET /api/leaderboard/monthly?month=2026-06` as User A:
-  - returned 2 visible rows.
-- `GET /api/leaderboard/friends?period=weekly` as User A:
-  - returned 2 visible rows.
-- `GET /api/leaderboard/me/summary` as User A:
-  - returned `todayScore: 67`
-  - returned `weeklyRank: 1`.
-- `GET /api/dashboard/today?date=2026-06-30` as User A:
-  - returned `status.dailyScore: 67`, confirming leaderboard recalculation updates `DailyLog`.
+No backend endpoints were touched in Phase 8. Frontend UI/routing checks were run instead
+(see below).
+
+## UI / routing check results
+
+- `npm run build` passed: 2268 modules transformed, no TypeScript errors.
+- `vite preview` served the app: root returned HTTP 200 with the FitBoard `index.html`.
+- SPA fallback returned HTTP 200 for every route:
+  `/dashboard`, `/nutrition`, `/activity`, `/leaderboard`, `/friends`, `/profile`, `/settings`.
+- All user-facing UI text is Turkish; code, file names and comments are English.
+- Responsive classes are present (desktop sidebar `hidden lg:flex`, content `lg:pl-64`,
+  mobile nav `lg:hidden`, dashboard grid `grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4`).
+- All new files are within code-size limits (largest is `StatCard.tsx` at 65 lines).
 
 ## Known issues
 
-- `currentStreak` is still returned as 0 because streak calculation has not been implemented yet.
-- Existing frontend dev server may still be running from earlier work; no frontend files were changed in Phase 7.
+- Pages are placeholders only; no real backend data is wired yet (by design for Phase 8).
+- Header avatar/user area and the notification bell are static placeholders; real auth
+  state is not implemented yet.
+- `lucide-react` is pinned at `^1.22.0` in this workspace; icons resolve and build fine.
+- `currentStreak` is still returned as `0` by the backend because streak calculation is
+  not implemented yet (carried over from Phase 7).
 - PowerShell on this machine does not support `&&`; commands were run separately.
-- `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md` still appears to contain Phase 0 prompt content; it was not changed during Phase 7.
+
+## Current phase status
+
+Phase 8 (frontend base layout and app shell) is complete and builds successfully.
 
 ## Git commits
 
@@ -122,8 +130,10 @@ Endpoint tests were run against the compiled backend with PowerShell `Invoke-Res
 - `63da7b2 feat: add dashboard backend module`
 - `ba88747 feat: add activity backend module`
 - `84cb21f feat: add social follow backend module`
-- `feat: add leaderboard backend module`
+- `7337d11 feat: add leaderboard backend module`
+- `feat: add frontend base layout` (this phase)
 
 ## Next recommended step
 
-Review Phase 7 backend behavior, then start Phase 8 only when explicitly requested.
+Start Phase 9: wire authentication UI (login/register forms) and an auth provider,
+then connect the dashboard to real backend data. Begin only when explicitly requested.

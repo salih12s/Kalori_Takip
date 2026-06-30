@@ -1,47 +1,19 @@
-# Phase 0 Setup Prompt
+# Update Current State Prompt
 
-Read these first:
+Update only this file:
 
-- CLAUDE.md
-- docs/CURRENT_STATE.md
-- docs/PROJECT_SCOPE.md
-- docs/TECH_STACK.md
-- docs/ARCHITECTURE.md
-- docs/DATABASE_SCHEMA.md
-- docs/FRONTEND_RULES.md
-- docs/BACKEND_RULES.md
-- docs/CODE_SIZE_LIMITS.md
-- docs/AI_AGENT_RULES.md
-- docs/SECURITY.md
+```txt
+docs/CURRENT_STATE.md
 
-We are starting Phase 0.
+Add:
 
-Do only project setup.
+completed work
+changed files
+commands run
+endpoint test results
+known issues
+current phase status
+next recommended step
 
-Do not create auth UI.
-Do not create dashboard UI.
-Do not create nutrition UI.
-Do not implement out-of-phase features.
-
-Tasks:
-
-1. Create backend structure.
-2. Create frontend structure.
-3. Create `.env.example`.
-4. Create root `.gitignore`.
-5. Create backend health endpoint:
-   `GET /api/health`
-6. Prepare Prisma schema for PostgreSQL.
-7. Do not simplify the database design without approval.
-8. Report install and migration commands.
-
-Required response format:
-
-```md
-## Plan
-## Files to change
-## Implementation
-## Commands
-## Test checklist
-## Next step
+Do not modify any other file unless the user explicitly approved it.
 ```
