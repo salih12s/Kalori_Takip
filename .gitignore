@@ -36,3 +36,7 @@ Thumbs.db
 !.vscode/extensions.json
 
 coverage/
+
+# Build artifacts
+frontend-dist.zip
+*.zip
