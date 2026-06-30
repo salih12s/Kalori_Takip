@@ -2,105 +2,124 @@
 
 ## Phase
 
-Phase 11 - Frontend nutrition page is implemented.
+Phase 12 - Frontend activity page is implemented.
 
 ## Completed work
 
-- Connected the Nutrition / Yemek Günlüğü page to real backend nutrition endpoints:
-  - `GET /api/foods/search?q=...`
-  - `POST /api/foods`
-  - `GET /api/meals?date=YYYY-MM-DD`
-  - `POST /api/meals/entries`
-  - `DELETE /api/meals/entries/:entryId`
-- Added nutrition feature API client:
-  - `frontend/src/features/nutrition/api/nutrition.api.ts`
+- Connected the Activity / Aktivite page to real backend activity endpoints:
+  - `GET /api/activities?date=YYYY-MM-DD`
+  - `POST /api/activities`
+  - `DELETE /api/activities/:activityId`
+  - `POST /api/activities/off-day`
+  - `POST /api/activities/workouts`
+  - `DELETE /api/activities/workouts/:workoutId`
+  - `POST /api/activities/water`
+  - `DELETE /api/activities/water/:waterLogId`
+- Added activity feature API client:
+  - `frontend/src/features/activity/api/activity.api.ts`
 - Added TanStack Query hooks:
-  - `useDailyMeals(date)`
-  - `useFoodSearch(query)`
-  - `useAddFoodEntry()`
-  - `useDeleteFoodEntry(date)`
-  - `useCreateFood()`
+  - `useDailyActivity(date)`
+  - `useAddActivity()`
+  - `useDeleteActivity(date)`
+  - `useAddWorkout()`
+  - `useDeleteWorkout(date)`
+  - `useAddWaterLog()`
+  - `useDeleteWaterLog(date)`
+  - `useSetOffDay()`
 - Added Zod schemas for:
-  - adding a food entry
-  - creating a local food
-- Replaced the placeholder Nutrition page with real data rendering.
+  - activity entry
+  - workout session
+  - water log
+  - off-day state
+- Replaced the placeholder Activity page with real data rendering.
 - Added date selection; default date is today.
-- Added daily nutrition summary cards:
-  - Toplam Kalori
-  - Protein
-  - Karbonhidrat
-  - Yağ
-- Added meal tabs for:
-  - Kahvaltı
-  - Öğle
-  - Akşam
-  - Ara Öğün
-- Added meal cards with entry count, calories, empty state, and `Yemek Ekle` action.
-- Added food search with debounced query and real backend results.
-- Added add-food-entry dialog.
-- Added create-food dialog for local/user-created foods.
-- Added food entry delete action.
-- Mutations invalidate nutrition meals queries and dashboard queries so totals can refresh.
+- Added daily activity summary cards:
+  - Adım
+  - Koşu
+  - Yürüyüş
+  - Spor Süresi
+  - Yakılan Kalori
+  - Su
+  - Spor Günü
+  - Dinlenme Günü
+- Added forms and lists for:
+  - run/walk/steps/workout activity entries
+  - workout sessions
+  - water logs
+  - off-day/rest-day status
+- Mutations invalidate activity daily queries and dashboard queries so totals can refresh.
 - Added loading and error states:
-  - `NutritionSkeleton`
+  - `ActivitySkeleton`
   - `ErrorState` with Turkish copy
 - No backend code was changed.
 - No Prisma schema change was made.
-- Activity, social, and leaderboard frontend pages were not implemented in this phase.
-- External food API integration, barcode scanner, and AI food recognition were not added.
+- Social, leaderboard, and challenges frontend pages were not implemented in this phase.
+- Health Connect, HealthKit, Strava, and other external integrations were not added.
 
-## Nutrition behavior decision
+## Activity behavior decision
 
-The page uses meal tabs instead of rendering all meal sections at once. This keeps the first nutrition UI focused and compact while still covering all meal types.
+The frontend uses only activity enum values accepted by the current backend schema:
 
-Food creation is local/manual only. Created foods are searchable through the existing backend search endpoint; no external API or barcode/AI workflow was added.
+- `STEPS`
+- `WALK`
+- `RUN`
+- `WORKOUT`
+- `OFF_DAY`
+
+Prompt examples included values such as cycling, football, swimming, and home workout, but those are not present in the current Prisma/backend enum and would be rejected by the API.
 
 ## Changed files
 
-- `frontend/src/features/nutrition/api/nutrition.api.ts`
-- `frontend/src/features/nutrition/components/AddFoodEntryDialog.tsx`
-- `frontend/src/features/nutrition/components/CreateFoodDialog.tsx`
-- `frontend/src/features/nutrition/components/DailyNutritionSummary.tsx`
-- `frontend/src/features/nutrition/components/FoodEntryItem.tsx`
-- `frontend/src/features/nutrition/components/FoodSearchInput.tsx`
-- `frontend/src/features/nutrition/components/MealCard.tsx`
-- `frontend/src/features/nutrition/components/MealTabs.tsx`
-- `frontend/src/features/nutrition/components/NutritionSkeleton.tsx`
-- `frontend/src/features/nutrition/hooks/useAddFoodEntry.ts`
-- `frontend/src/features/nutrition/hooks/useCreateFood.ts`
-- `frontend/src/features/nutrition/hooks/useDailyMeals.ts`
-- `frontend/src/features/nutrition/hooks/useDeleteFoodEntry.ts`
-- `frontend/src/features/nutrition/hooks/useFoodSearch.ts`
-- `frontend/src/features/nutrition/pages/NutritionPage.tsx`
-- `frontend/src/features/nutrition/schemas/nutrition.schema.ts`
-- `frontend/src/features/nutrition/types/nutrition.types.ts`
-- `frontend/src/features/nutrition/utils/meal-labels.ts`
+- `frontend/src/features/activity/api/activity.api.ts`
+- `frontend/src/features/activity/components/ActivityEntryForm.tsx`
+- `frontend/src/features/activity/components/ActivityEntryItem.tsx`
+- `frontend/src/features/activity/components/ActivityEntryList.tsx`
+- `frontend/src/features/activity/components/ActivitySkeleton.tsx`
+- `frontend/src/features/activity/components/DailyActivitySummary.tsx`
+- `frontend/src/features/activity/components/OffDayCard.tsx`
+- `frontend/src/features/activity/components/WaterLogForm.tsx`
+- `frontend/src/features/activity/components/WaterLogList.tsx`
+- `frontend/src/features/activity/components/WorkoutForm.tsx`
+- `frontend/src/features/activity/components/WorkoutItem.tsx`
+- `frontend/src/features/activity/components/WorkoutList.tsx`
+- `frontend/src/features/activity/hooks/useAddActivity.ts`
+- `frontend/src/features/activity/hooks/useAddWaterLog.ts`
+- `frontend/src/features/activity/hooks/useAddWorkout.ts`
+- `frontend/src/features/activity/hooks/useDailyActivity.ts`
+- `frontend/src/features/activity/hooks/useDeleteActivity.ts`
+- `frontend/src/features/activity/hooks/useDeleteWaterLog.ts`
+- `frontend/src/features/activity/hooks/useDeleteWorkout.ts`
+- `frontend/src/features/activity/hooks/useSetOffDay.ts`
+- `frontend/src/features/activity/pages/ActivityPage.tsx`
+- `frontend/src/features/activity/schemas/activity.schema.ts`
+- `frontend/src/features/activity/types/activity.types.ts`
+- `frontend/src/features/activity/utils/activity-labels.ts`
 - `docs/CURRENT_STATE.md`
 
-Removed `.gitkeep` files from populated nutrition folders:
+Removed `.gitkeep` files from populated activity folders:
 
-- `frontend/src/features/nutrition/api/.gitkeep`
-- `frontend/src/features/nutrition/components/.gitkeep`
-- `frontend/src/features/nutrition/hooks/.gitkeep`
-- `frontend/src/features/nutrition/schemas/.gitkeep`
-- `frontend/src/features/nutrition/types/.gitkeep`
-- `frontend/src/features/nutrition/utils/.gitkeep`
+- `frontend/src/features/activity/api/.gitkeep`
+- `frontend/src/features/activity/components/.gitkeep`
+- `frontend/src/features/activity/hooks/.gitkeep`
+- `frontend/src/features/activity/schemas/.gitkeep`
+- `frontend/src/features/activity/types/.gitkeep`
+- `frontend/src/features/activity/utils/.gitkeep`
 
 ## Commands run
 
 ```bash
 npm run build
-npm run preview -- --host 127.0.0.1 --port 4182 --strictPort
+npm run preview -- --host 127.0.0.1 --port 4183 --strictPort
 ```
 
 Backend was started locally with `node dist/server.js` only when port `5000` was not already listening.
 
-## Nutrition flow check results
+## Activity flow check results
 
 - `npm run build` passed.
-- Vite preview served the built frontend on port `4182`.
+- Vite preview served the built frontend on port `4183`.
 - Preview route smoke checks returned HTTP 200:
-  - `/nutrition`
+  - `/activity`
   - `/login`
 - Backend health check passed:
   - `GET /api/health`
@@ -108,31 +127,42 @@ Backend was started locally with `node dist/server.js` only when port `5000` was
 - The test user was seeded with:
   - profile
   - active goal
-- Nutrition API flow passed:
-  - `GET /api/meals?date=2026-06-30` returned initial daily totals.
-  - `POST /api/foods` created a local food.
-  - `GET /api/foods/search?q=phase11` returned the created food.
-  - `POST /api/meals/entries` added the food to `BREAKFAST`.
-  - Daily calories updated from `0` to `140`.
-  - Breakfast entry count updated from `0` to `1`.
-  - `DELETE /api/meals/entries/:entryId` deleted the food entry.
-  - Daily calories updated back to `0`.
-  - Breakfast entry count updated back to `0`.
+- Activity API flow passed:
+  - `GET /api/activities?date=2026-06-30` returned initial daily totals.
+  - Added RUN activity.
+  - Added WALK activity.
+  - Steps updated from `0` to `10000`.
+  - Run distance updated to `4.2`.
+  - Walk distance updated to `2`.
+  - Deleted WALK activity.
+  - Steps updated to `6000`.
+  - Added workout session.
+  - Workout count updated to `1`.
+  - Workout minutes updated to `75`.
+  - Deleted workout session.
+  - Workout count updated to `0`.
+  - Added water log.
+  - Water updated to `500`.
+  - Deleted water log.
+  - Water updated to `0`.
+  - Marked off day.
+  - Unmarked off day.
+  - `GET /api/dashboard/today?date=2026-06-30` reflected activity steps as `6000`.
 - Backend diff check showed no backend files changed.
 - `frontend/.env` remains ignored by Git.
-- File size check passed; largest nutrition file is `CreateFoodDialog.tsx` at 153 lines.
-- User-facing text in nutrition files was checked for mojibake patterns and passed.
+- File size check passed; largest activity file is `activity.types.ts` at 86 lines.
+- User-facing text in activity files was checked for mojibake patterns and passed.
 
 ## Known issues
 
 - Full browser automation is not installed in this workspace, so client-side redirect behavior was verified by code path and route smoke checks rather than a real browser automation run.
 - Vite still reports a chunk-size warning after build (`>500 kB` minified JS). The build succeeds; code splitting can be handled in a later optimization phase.
-- Nutrition page is connected to backend data, but activity, social, and leaderboard frontend pages are still placeholders by design.
+- Activity page is connected to backend data, but social and leaderboard frontend pages are still placeholders by design.
 - `currentStreak` is still returned as `0` by the backend because streak calculation has not been implemented yet.
 
 ## Current phase status
 
-Phase 11 (frontend nutrition page) is complete and builds successfully.
+Phase 12 (frontend activity page) is complete and builds successfully.
 
 ## Git commits
 
@@ -147,8 +177,9 @@ Phase 11 (frontend nutrition page) is complete and builds successfully.
 - `a3bb68c feat: add frontend base layout`
 - `e106343 feat: add frontend auth and onboarding`
 - `4519b4c feat: connect dashboard to backend data`
-- `feat: connect nutrition page to backend`
+- `2d085bc feat: connect nutrition page to backend`
+- `feat: connect activity page to backend`
 
 ## Next recommended step
 
-Review the nutrition logging UI, then start the activity frontend page only when explicitly requested.
+Review the activity tracking UI, then start the social frontend page only when explicitly requested.
