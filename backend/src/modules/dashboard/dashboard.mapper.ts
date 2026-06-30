@@ -84,6 +84,8 @@ export function mapWeeklyDay(dailyLog: DailyLog | null, date: Date, hasFoodEntri
     totalCarbs: roundTotal(dailyLog ? Number(dailyLog.totalCarbs) : 0),
     totalFat: roundTotal(dailyLog ? Number(dailyLog.totalFat) : 0),
     totalSteps: dailyLog?.totalSteps ?? 0,
+    totalBurnedCalories: dailyLog?.totalBurnedCalories ?? 0,
+    waterMl: dailyLog?.waterMl ?? 0,
     isWorkoutDay: dailyLog?.isWorkoutDay ?? false,
     isOffDay: dailyLog?.isOffDay ?? false,
     dailyScore: dailyLog?.dailyScore ?? 0,

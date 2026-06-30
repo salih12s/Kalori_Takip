@@ -67,6 +67,8 @@ function buildActivity(dailyLog: DailyLog, goal: DashboardGoal | null): Dashboar
     totalRunKm: Number(dailyLog.totalRunKm),
     totalWalkKm: Number(dailyLog.totalWalkKm),
     totalWorkoutMinutes: dailyLog.totalWorkoutMinutes,
+    totalBurnedCalories: dailyLog.totalBurnedCalories,
+    waterMl: dailyLog.waterMl,
     isWorkoutDay: dailyLog.isWorkoutDay,
     isOffDay: dailyLog.isOffDay
   };
@@ -100,6 +102,7 @@ function hasLoggedDay(log: WeeklyLog): boolean {
     Number(log.totalRunKm) > 0 ||
     Number(log.totalWalkKm) > 0 ||
     log.totalWorkoutMinutes > 0 ||
+    log.totalBurnedCalories > 0 ||
     log.waterMl > 0 ||
     log.isWorkoutDay ||
     log.isOffDay

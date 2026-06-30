@@ -37,6 +37,8 @@ export type DashboardActivity = {
   totalRunKm: number;
   totalWalkKm: number;
   totalWorkoutMinutes: number;
+  totalBurnedCalories: number;
+  waterMl: number;
   isWorkoutDay: boolean;
   isOffDay: boolean;
 };
@@ -76,6 +78,8 @@ export type WeeklyDaySummary = {
   totalCarbs: number;
   totalFat: number;
   totalSteps: number;
+  totalBurnedCalories: number;
+  waterMl: number;
   isWorkoutDay: boolean;
   isOffDay: boolean;
   dailyScore: number;

@@ -2,59 +2,89 @@
 
 ## Phase
 
-Phase 4 - Dashboard backend is implemented.
+Phase 5 - Activity backend is implemented.
 
 ## Completed work
 
-- Implemented protected dashboard backend endpoints:
-  - `GET /api/dashboard/today`
-  - `GET /api/dashboard/today?date=YYYY-MM-DD`
-  - `GET /api/dashboard/weekly`
-  - `GET /api/dashboard/weekly?startDate=YYYY-MM-DD`
-- Added dashboard module with routes, controller, service, repository, validation, types, and mapper.
-- Added shared date utilities for date-only parsing, formatting, day addition, current day, and week start.
-- Mounted dashboard routes in `backend/src/app.ts`.
-- `GET /api/dashboard/today` creates the requested user's DailyLog when missing.
-- `GET /api/dashboard/today` creates a minimal profile when missing.
-- `GET /api/dashboard/weekly` returns seven day summaries without creating missing DailyLogs.
-- Weekly missing days are returned with zero/default values.
-- Dashboard calculations use existing `DailyLog`, `Meal`, `FoodEntry`, `ActivityEntry`, `Profile`, and active `UserGoal` data.
-- No Prisma schema change was made.
+- Implemented protected activity backend endpoints:
+  - `GET /api/activities?date=YYYY-MM-DD`
+  - `POST /api/activities`
+  - `DELETE /api/activities/:activityId`
+  - `POST /api/activities/off-day`
+  - `POST /api/activities/workouts`
+  - `DELETE /api/activities/workouts/:workoutId`
+  - `POST /api/activities/water`
+  - `DELETE /api/activities/water/:waterLogId`
+- Added activity module with routes, controller, service, repository, validation, types, and mapper.
+- Mounted activity routes in `backend/src/app.ts`.
+- Activity endpoints create the user's DailyLog for the selected date when missing.
+- Activity totals are recalculated from existing ActivityEntry, WorkoutSession, and WaterLog rows after create/delete.
+- Off-day updates set `DailyLog.isOffDay` and note without deleting activity entries.
+- Workout create/delete updates `DailyLog.isWorkoutDay`, workout minutes, and burned calories.
+- Water create/delete updates `DailyLog.waterMl`.
+- Dashboard today response now includes:
+  - `activity.totalBurnedCalories`
+  - `activity.waterMl`
 - No frontend UI was created or changed.
-- No activity, social, leaderboard, challenges, external food API, barcode, or AI food recognition work was started.
+- No social, leaderboard, challenges, external integrations, Health Connect, HealthKit, or Strava work was started.
 
-## Calculation behavior
+## Schema changes
 
-- Progress values are percentages clamped from 0 to 100.
-- If an active goal is missing:
-  - `goal` is `null`
-  - goal-based progress values are `0`
-  - `remainingCalories` is `null`
-  - `stepGoal` and `workoutGoal` are `null`
-- `remainingCalories` can be negative if total calories exceed the goal.
-- `loggedDays` counts days with food entries, activity entries, notes, non-zero totals, workout day, or off day markers.
-- `hasLoggedFood` and `hasFoodEntries` are based on FoodEntry presence.
-- Activity values currently come from `DailyLog` because the activity module has not been implemented yet.
+Migration:
+
+- `backend/prisma/migrations/20260630000212_add_activity_tracking/migration.sql`
+
+DailyLog:
+
+- Added `totalBurnedCalories Int @default(0)`
+- Added relation fields for workout sessions and water logs.
+
+User:
+
+- Added relation fields for workout sessions and water logs.
+
+WorkoutSession:
+
+- Added new model for manual workout sessions.
+- Uses `WorkoutType` enum.
+- Stores title, muscle groups, duration, burned calories, intensity, and note.
+
+WaterLog:
+
+- Added new model for water entries.
+- Stores amount in milliliters.
+
+WorkoutType enum:
+
+- `WEIGHT_TRAINING`
+- `CARDIO`
+- `MOBILITY`
+- `SPORT`
+- `OTHER`
 
 ## Changed files
 
+- `backend/prisma/schema.prisma`
+- `backend/prisma/migrations/20260630000212_add_activity_tracking/migration.sql`
 - `backend/src/app.ts`
-- `backend/src/shared/utils/date.ts`
-- `backend/src/modules/dashboard/dashboard.routes.ts`
-- `backend/src/modules/dashboard/dashboard.controller.ts`
-- `backend/src/modules/dashboard/dashboard.service.ts`
-- `backend/src/modules/dashboard/dashboard.repository.ts`
-- `backend/src/modules/dashboard/dashboard.validation.ts`
+- `backend/src/modules/activity/activity.routes.ts`
+- `backend/src/modules/activity/activity.controller.ts`
+- `backend/src/modules/activity/activity.service.ts`
+- `backend/src/modules/activity/activity.repository.ts`
+- `backend/src/modules/activity/activity.validation.ts`
+- `backend/src/modules/activity/activity.types.ts`
+- `backend/src/modules/activity/activity.mapper.ts`
 - `backend/src/modules/dashboard/dashboard.types.ts`
+- `backend/src/modules/dashboard/dashboard.service.ts`
 - `backend/src/modules/dashboard/dashboard.mapper.ts`
 - `docs/CURRENT_STATE.md`
 
 ## Commands run
 
 ```bash
+npm run prisma:migrate -- --name add_activity_tracking
 npm run prisma:generate
 npm run build
-npm run prisma:migrate -- --name dashboard_no_schema_change
 ```
 
 Endpoint tests were run against the compiled backend with PowerShell `Invoke-RestMethod`.
@@ -62,41 +92,65 @@ Endpoint tests were run against the compiled backend with PowerShell `Invoke-Res
 ## Endpoint test results
 
 - `GET /api/health`: passed.
-- Unauthenticated `GET /api/dashboard/today`: returned 401.
+- Unauthenticated `GET /api/activities?date=2026-06-30`: returned 401.
 - `POST /api/auth/register`: passed, token returned.
 - `GET /api/auth/me`: passed.
-- `PUT /api/profile/me`: passed for dashboard test profile data.
-- `POST /api/goals`: passed for dashboard test goals.
-- `POST /api/foods`: passed for dashboard test food.
-- `POST /api/meals/entries`: passed, created a 140-calorie entry.
-- `GET /api/dashboard/today`: passed.
-- `GET /api/dashboard/today?date=2026-06-30`: passed.
-- Today dashboard reflected:
-  - totalCalories: 140
-  - remainingCalories: 2160
-  - calorieProgress: 6
-  - totalProtein: 12
-  - proteinProgress: 9
-  - hasLoggedFood: true
-  - breakfast calories: 140
-- User isolation check passed: another user's 999-calorie entry did not affect the current user's dashboard.
-- `GET /api/dashboard/weekly`: passed with seven day range.
-- `GET /api/dashboard/weekly?startDate=2026-06-29`: passed.
-- Weekly dashboard reflected:
-  - startDate: 2026-06-29
-  - endDate: 2026-07-05
-  - days: 7
-  - totalCalories: 140
-  - loggedDays: 1
-  - workoutGoal: 4
+- `GET /api/activities?date=2026-06-30`: passed, created missing DailyLog with zero activity totals.
+- `POST /api/activities` with RUN: passed.
+- `POST /api/activities` with WALK: passed.
+- `GET /api/activities?date=2026-06-30` after RUN/WALK reflected:
+  - activities: 2
+  - totalSteps: 9000
+  - totalRunKm: 4.2
+  - totalWalkKm: 2.1
+  - totalBurnedCalories: 440
+- `POST /api/activities/workouts`: passed.
+- `GET /api/activities?date=2026-06-30` after workout reflected:
+  - workouts: 1
+  - isWorkoutDay: true
+  - totalWorkoutMinutes: 75
+  - totalBurnedCalories: 840
+- `POST /api/activities/off-day`: passed.
+- Off-day check confirmed:
+  - isOffDay: true
+  - note: Rest day
+  - activity entries were not deleted.
+- `POST /api/activities/water`: passed.
+- Water check reflected:
+  - waterLogs: 1
+  - waterMl: 500
+- `GET /api/dashboard/today?date=2026-06-30`: passed and reflected:
+  - totalSteps: 9000
+  - totalRunKm: 4.2
+  - totalWalkKm: 2.1
+  - totalWorkoutMinutes: 75
+  - totalBurnedCalories: 840
+  - waterMl: 500
+  - isWorkoutDay: true
+  - isOffDay: true
+- User isolation check passed. Another user's 99999-step activity did not affect the current user's activity totals.
+- `DELETE /api/activities/:activityId`: passed, totals recalculated.
+- `DELETE /api/activities/workouts/:workoutId`: passed, workout totals recalculated and `isWorkoutDay` became false when no workouts remained.
+- `DELETE /api/activities/water/:waterLogId`: passed, water total recalculated to 0.
+- Final activity check after deletes reflected:
+  - activities: 1
+  - workouts: 0
+  - waterLogs: 0
+  - totalSteps: 3000
+  - totalRunKm: 0
+  - totalWalkKm: 2.1
+  - totalWorkoutMinutes: 0
+  - totalBurnedCalories: 120
+  - waterMl: 0
+  - isWorkoutDay: false
+  - isOffDay: true
 
 ## Known issues
 
 - `docs/prompts/UPDATE_CURRENT_STATE_PROMPT.md` still appears to contain Phase 0 prompt content; there was no safe matching source content to restore it.
 - PowerShell on this machine does not support `&&`; commands were run separately.
-- Existing frontend dev server was left running, but no frontend code or UI was changed during Phase 4.
-- DailyLog does not currently store fiber or sugar totals, so dashboard nutrition totals cover calories, protein, carbs, and fat only.
-- Activity module is not implemented yet, so dashboard activity values use the current DailyLog defaults.
+- Existing frontend dev server was left running, but no frontend code or UI was changed during Phase 5.
+- Step progress in dashboard remains 0 when the user has no active step goal. This is expected from Phase 4 goal-missing behavior.
 
 ## Git commits
 
@@ -104,7 +158,8 @@ Endpoint tests were run against the compiled backend with PowerShell `Invoke-Res
 - `21fe750 feat: add profile and goals modules`
 - `9a32d17 feat: add nutrition backend module`
 - `a535f89 feat: align nutrition schema`
+- `63da7b2 feat: add dashboard backend module`
 
 ## Next recommended step
 
-Review Phase 4 backend behavior, then start Phase 5 - Activity backend only when explicitly requested.
+Review Phase 5 backend behavior, then start Phase 6 - Social backend only when explicitly requested.
