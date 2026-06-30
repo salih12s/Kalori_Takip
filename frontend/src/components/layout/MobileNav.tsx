@@ -9,7 +9,7 @@ import { cn } from "../../lib/cn";
  */
 export function MobileNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-7 border-t border-stone-200 bg-white/95 backdrop-blur lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-8 border-t border-stone-200 bg-white/95 backdrop-blur lg:hidden">
       {navItems.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}

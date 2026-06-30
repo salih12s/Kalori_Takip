@@ -2,108 +2,126 @@
 
 ## Phase
 
-Phase 14 - Frontend profile and settings pages are implemented.
+Phase 15 - Challenges (backend + frontend) is implemented.
 
 ## Completed work
 
-- Connected the Profile / Profil page to the real profile and goals endpoints:
-  - `GET /api/profile/me`
-  - `PUT /api/profile/me`
-  - `GET /api/goals/me`
-  - `POST /api/goals`
-  - `PUT /api/goals/:goalId`
-- Added profile feature:
-  - `profile.api.ts` client and `profile.types.ts` (re-exports the shared onboarding
-    domain types and adds `UpdateGoalPayload`).
-  - `profile.schema.ts` re-uses the onboarding `profileStepSchema`/`goalStepSchema`
-    (renamed to `profileFormSchema`/`goalFormSchema`) so validation stays in one place.
-  - `profile-labels.ts` (gender/privacy/goal-type Turkish labels and select options).
-  - Hooks: `useMyProfile`, `useUpdateProfile`, `useMyGoal`, `useCreateGoal`, `useUpdateGoal`.
-  - Components: `ProfileOverviewCard`, `ProfileForm`, `GoalOverviewCard`, `GoalForm`,
-    `ProfileSkeleton`.
-  - `ProfilePage` composes the overview cards and forms (Profil Özeti, Profil Bilgileri,
-    Hedef Özeti, Hedef Bilgileri) with a loading skeleton and error state.
-- Profile form prefilled from `GET /profile/me`; goal form prefilled from `GET /goals/me`.
-  - The goal form updates the active goal (`PUT`) when one exists, otherwise creates one
-    (`POST`). In practice users reaching the app shell already have an active goal.
-- Added settings feature:
-  - `AccountSettingsCard` shows the current username/email and a "Çıkış Yap" button that
-    reuses the existing auth `logout` and redirects to `/login`.
-  - `AppPreferencesCard` stores local-only theme and unit preferences in `localStorage`
-    (no backend involved).
-  - `SettingsSkeleton` and a real `SettingsPage`.
-- Mutations invalidate the relevant caches:
-  - Profile update -> `["profile","me"]`.
-  - Goal create/update -> `["goals","me"]`, `["onboarding-status"]`, `["dashboard"]`,
-    `["leaderboard"]`.
-- Only backend-supported `GoalType` values are offered (LOSE_WEIGHT, MAINTAIN_WEIGHT,
-  GAIN_WEIGHT, IMPROVE_FITNESS). `BUILD_MUSCLE` / "Kas Kazanmak" is intentionally absent.
-- No backend code was changed. No Prisma schema change was made.
-- No image upload, password change, account deletion, challenges, badges, or external
-  integrations were added (out of scope for this phase).
+- Added a Challenge / ChallengeMember domain (backend + frontend).
+- Backend module `backend/src/modules/challenges/` with routes, controller, service,
+  repository, validation, types and mapper. Mounted at `/api/challenges`.
+- New backend endpoints (all require a Bearer token):
+  - `GET /api/challenges` — visible challenges (public active + created/joined by user).
+  - `GET /api/challenges/mine` — challenges the user created or joined.
+  - `GET /api/challenges/:challengeId` — detail with safe member summaries.
+  - `POST /api/challenges` — create (creator auto-joins; status ACTIVE).
+  - `POST /api/challenges/:challengeId/join` — join (guards CANCELLED/ended).
+  - `DELETE /api/challenges/:challengeId/leave` — leave (idempotent).
+  - `POST /api/challenges/:challengeId/recalculate` — recompute the user's progress.
+  - `POST /api/challenges/recalculate-all` — recompute all joined active challenges.
+- Progress is computed from existing `DailyLog` rows only (no DailyLogs are created):
+  - STEPS: sum of `totalSteps`.
+  - RUN_DISTANCE: sum of `totalRunKm`.
+  - WATER: sum of `waterMl`.
+  - WORKOUT: count of days where `isWorkoutDay` is true.
+  - FOOD_LOG: count of days where `totalCalories > 0`.
+  - Member status becomes COMPLETED when progress >= targetValue.
+- Frontend feature `frontend/src/features/challenges/` (api, hooks, schema, types, utils,
+  components, page) connected to the new endpoints.
+- New route `/challenges` and a sidebar/mobile nav item labelled "Meydan Okuma" (Swords
+  icon). `MobileNav` grid widened to 8 columns.
+- `ChallengesPage` composes: "Benim Challenge'larım" (with a "Tümünü Güncelle" action),
+  "Aktif Challenge'lar" list, a create dialog and a members dialog.
+- `ChallengeCard` shows type badge, target+unit, date range, member count, a progress bar
+  when joined, and Katıl / Ayrıl / İlerlemeyi Güncelle / Tamamlandı actions.
+- Only the 5 MVP challenge types are exposed (STEPS, FOOD_LOG, WORKOUT, RUN_DISTANCE,
+  WATER); no CUSTOM type. Badges, streaks, notifications, image upload and external
+  integrations were not added.
+
+## Schema changes
+
+Challenge / ChallengeMember did not exist in `schema.prisma` (they were only listed as
+"later models" in `docs/DATABASE_SCHEMA.md`), so the smallest safe additive change was made:
+
+- New enums: `ChallengeType` (STEPS, FOOD_LOG, WORKOUT, RUN_DISTANCE, WATER),
+  `ChallengeStatus` (ACTIVE, COMPLETED, CANCELLED), `ChallengeMemberStatus` (ACTIVE, COMPLETED).
+- New models: `Challenge` (creator, title, description, type, targetValue, unit, startsAt,
+  endsAt, status, isPublic) and `ChallengeMember` (challenge, user, progress, status,
+  joinedAt) with a unique `(challengeId, userId)`.
+- Two back-relations added to `User` (`createdChallenges`, `challengeMemberships`).
+- Migration `20260630020736_add_challenges` created and applied. The change is purely
+  additive (new tables/enums only); no existing tables were modified.
+
+Design decision: a creator is auto-joined on create and **may** leave; the challenge
+itself is never deleted in the MVP (leave only removes the membership). Leave is
+idempotent (safe success whether or not the user was a member).
 
 ## Changed files
 
-New profile files:
+Backend:
 
-- `frontend/src/features/profile/api/profile.api.ts`
-- `frontend/src/features/profile/types/profile.types.ts`
-- `frontend/src/features/profile/schemas/profile.schema.ts`
-- `frontend/src/features/profile/utils/profile-labels.ts`
-- `frontend/src/features/profile/hooks/useMyProfile.ts`
-- `frontend/src/features/profile/hooks/useUpdateProfile.ts`
-- `frontend/src/features/profile/hooks/useMyGoal.ts`
-- `frontend/src/features/profile/hooks/useCreateGoal.ts`
-- `frontend/src/features/profile/hooks/useUpdateGoal.ts`
-- `frontend/src/features/profile/components/ProfileOverviewCard.tsx`
-- `frontend/src/features/profile/components/ProfileForm.tsx`
-- `frontend/src/features/profile/components/GoalOverviewCard.tsx`
-- `frontend/src/features/profile/components/GoalForm.tsx`
-- `frontend/src/features/profile/components/ProfileSkeleton.tsx`
-- `frontend/src/features/profile/pages/ProfilePage.tsx` (replaced placeholder)
+- `backend/prisma/schema.prisma`
+- `backend/prisma/migrations/20260630020736_add_challenges/migration.sql` (new)
+- `backend/src/app.ts`
+- `backend/src/modules/challenges/challenges.routes.ts` (new)
+- `backend/src/modules/challenges/challenges.controller.ts` (new)
+- `backend/src/modules/challenges/challenges.service.ts` (new)
+- `backend/src/modules/challenges/challenges.repository.ts` (new)
+- `backend/src/modules/challenges/challenges.validation.ts` (new)
+- `backend/src/modules/challenges/challenges.types.ts` (new)
+- `backend/src/modules/challenges/challenges.mapper.ts` (new)
 
-New settings files:
+Frontend:
 
-- `frontend/src/features/settings/components/AccountSettingsCard.tsx`
-- `frontend/src/features/settings/components/AppPreferencesCard.tsx`
-- `frontend/src/features/settings/components/SettingsSkeleton.tsx`
-- `frontend/src/features/settings/pages/SettingsPage.tsx` (replaced placeholder)
-
-Removed `.gitkeep` from now-populated profile (`api`, `components`, `hooks`, `schemas`,
-`types`, `utils`) and settings (`components`) directories.
+- `frontend/src/features/challenges/api/challenges.api.ts` (new)
+- `frontend/src/features/challenges/types/challenge.types.ts` (new)
+- `frontend/src/features/challenges/schemas/challenge.schema.ts` (new)
+- `frontend/src/features/challenges/utils/challenge-labels.ts` (new)
+- `frontend/src/features/challenges/hooks/` (7 hooks, new)
+- `frontend/src/features/challenges/components/` (ChallengeCard, ChallengeList,
+  CreateChallengeDialog, MyChallengesSection, ChallengeProgressBar, ChallengeTypeBadge,
+  ChallengeMembersDialog, ChallengesSkeleton — new)
+- `frontend/src/features/challenges/pages/ChallengesPage.tsx` (new)
+- `frontend/src/app/router/routes.tsx` (challenges path + nav item)
+- `frontend/src/app/router/AppRouter.tsx` (challenges route)
+- `frontend/src/components/layout/MobileNav.tsx` (grid-cols-8)
+- Removed `.gitkeep` from now-populated challenge directories.
 
 - `docs/CURRENT_STATE.md`
 
 ## Commands run
 
 ```bash
-npm run build      # frontend: tsc -b && vite build (passed)
-npm run preview -- --port 4194 --strictPort   # route smoke check
-node dist/server.js   # backend started locally for live API verification
+npx prisma format
+npm run prisma:migrate -- --name add_challenges   # creates + applies + generates
+npm run build            # backend: tsc (passed)
+npm run build            # frontend: tsc -b && vite build (passed)
+npm run preview -- --port 4195 --strictPort        # route smoke check
+node dist/server.js      # backend started locally for live API verification
 ```
 
-## Profile flow check results
+## Backend challenge check results
 
-A scripted end-to-end run against the live backend passed 10/10 checks:
+A scripted end-to-end run against the live backend passed 23/23 checks:
 
-- `GET /profile/me` returns the profile and exposes no `passwordHash`/`password`.
-- `PUT /profile/me` updates `fullName`, `bio`, `heightCm`, `currentWeightKg`,
-  `privacyLevel` and returns the updated profile.
-- `GET /goals/me` returns the active goal (with `id`, `isActive`).
-- `PUT /goals/:goalId` updates the goal in place (same id, stays active) including
-  `goalType`, calorie/protein/step/workout targets and `targetWeightKg`.
-- For a user with no goal, `GET /goals/me` is `null` and `POST /goals` creates one (201),
-  after which `GET /goals/me` returns it (validates the create path the form uses).
-- Preview route smoke checks returned HTTP 200 for `/profile`, `/settings` and `/login`.
+- `GET /api/challenges` without a token returns 401.
+- Created a user, seeded 3 days of `DailyLog` data, then created one challenge per type.
+- Each create returned 201, auto-joined the creator, and reported `memberCount = 1`.
+- Recalculate produced the exact expected progress for every type:
+  STEPS = 25000, RUN_DISTANCE = 8, WATER = 3000, WORKOUT = 2, FOOD_LOG = 2.
+- A membership whose progress reached the target was marked `COMPLETED`.
+- `GET /challenges`, `/challenges/mine` and `/challenges/:id` returned the expected
+  shapes; member summaries contained no `passwordHash`, `email` or body metrics.
+- `POST /challenges/recalculate-all` updated all joined active memberships.
+- A second user joined a public challenge (memberCount became 2), re-join returned the
+  existing membership safely, and leave returned `left: true`.
+- Joining an already-ended challenge returned a safe 400 ("Challenge has ended").
 
-## Settings flow check results
+## Frontend challenge check results
 
-- `SettingsPage` renders `AccountSettingsCard` (username/email from the auth context, a
-  Turkish "Çıkış Yap" logout) and `AppPreferencesCard` (local theme/unit preferences).
-- Logout reuses the Phase 9 auth `logout`, which clears the token; route guards then send
-  the user to `/login`.
-- Local preferences are `localStorage`-only and do not affect the build or backend.
-- Preview route smoke check returned HTTP 200 for `/settings`.
+- `npm run build` (frontend) passed: 2545 modules, no TypeScript errors.
+- Preview route smoke checks returned HTTP 200 for `/challenges` and `/login`.
+- The "Meydan Okuma" nav item and `/challenges` route are wired into the protected app shell.
+- All user-facing text is Turkish; no mojibake detected. Largest new file is 154 lines.
 
 ## Known issues
 
@@ -111,14 +129,14 @@ A scripted end-to-end run against the live backend passed 10/10 checks:
   verified via route smoke checks and live API contract checks rather than a real browser.
 - Vite still reports a chunk-size warning (`>500 kB` JS). The build succeeds; code
   splitting can be a later optimization.
-- The theme preference is stored locally but not yet applied (no theming system); it is a
-  forward-looking placeholder as allowed for this phase.
-- `currentStreak` is still returned as `0` by the backend (streak calculation not yet
-  implemented); unrelated to this phase.
+- Challenges are never auto-expired/cancelled by a job; `status` stays ACTIVE until a
+  future cancellation feature is added. Joining is still guarded by the end date.
+- `currentStreak` is still `0` from the backend (streak system intentionally not built yet).
 
 ## Current phase status
 
-Phase 14 (frontend profile and settings pages) is complete and builds successfully.
+Phase 15 (challenges backend + frontend) is complete; both backend and frontend build
+successfully and the live API flow passes.
 
 ## Git commits
 
@@ -136,10 +154,11 @@ Phase 14 (frontend profile and settings pages) is complete and builds successful
 - `2d085bc feat: connect nutrition page to backend`
 - `feat: connect activity page to backend`
 - `feat: connect social and leaderboard pages`
-- `feat: connect profile and settings pages` (this phase)
+- `feat: connect profile and settings pages`
+- `feat: add challenges feature` (this phase)
 
 ## Next recommended step
 
-The core MVP frontend is now connected end to end. Recommended next: a polish pass
-(empty/error consistency, responsive checks, optional Vite code-splitting) or begin the
-challenges feature when explicitly requested.
+Optional polish: auto-complete/cancel challenges by date via a job, surface joined
+challenge progress on the dashboard, or start the badges/streak system when explicitly
+requested.

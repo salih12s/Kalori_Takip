@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "../../components/layout/AppLayout";
 import { ActivityPage } from "../../features/activity/pages/ActivityPage";
 import { AuthLayout } from "../../features/auth/components/AuthLayout";
+import { ChallengesPage } from "../../features/challenges/pages/ChallengesPage";
 import { ProtectedRoute } from "../../features/auth/components/ProtectedRoute";
 import { LoginPage } from "../../features/auth/pages/LoginPage";
 import { RegisterPage } from "../../features/auth/pages/RegisterPage";
@@ -37,6 +38,7 @@ export function AppRouter() {
             <Route path={routePaths.nutrition} element={<NutritionPage />} />
             <Route path={routePaths.activity} element={<ActivityPage />} />
             <Route path={routePaths.leaderboard} element={<LeaderboardPage />} />
+            <Route path={routePaths.challenges} element={<ChallengesPage />} />
             <Route path={routePaths.friends} element={<FriendsPage />} />
             <Route path={routePaths.profile} element={<ProfilePage />} />
             <Route path={routePaths.settings} element={<SettingsPage />} />
