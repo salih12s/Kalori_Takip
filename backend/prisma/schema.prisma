@@ -76,8 +76,23 @@ enum FollowStatus {
 }
 
 enum LeaderboardPeriod {
+  DAILY
   WEEKLY
   MONTHLY
+}
+
+enum LeaderboardPointSource {
+  AGGREGATE
+  FOOD_LOG
+  CALORIE_GOAL
+  PROTEIN_GOAL
+  STEP_GOAL
+  WORKOUT
+  RUN_DISTANCE
+  WALK_DISTANCE
+  OFF_DAY
+  WATER
+  DAILY_COMPLETION
 }
 
 model User {
@@ -122,49 +137,49 @@ model Profile {
 }
 
 model UserGoal {
-  id                 String    @id @default(uuid()) @db.Uuid
-  userId             String    @db.Uuid
-  goalType           GoalType
-  dailyCalorieGoal   Int
-  dailyProteinGoal   Int
-  dailyCarbGoal      Int?
-  dailyFatGoal       Int?
-  dailyStepGoal      Int
-  weeklyWorkoutGoal  Int
-  startingWeightKg   Decimal?  @db.Decimal(5, 2)
-  targetWeightKg     Decimal?  @db.Decimal(5, 2)
-  startsAt           DateTime  @default(now()) @db.Date
-  endsAt             DateTime? @db.Date
-  isActive           Boolean   @default(true)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @db.Uuid
+  goalType          GoalType
+  dailyCalorieGoal  Int
+  dailyProteinGoal  Int
+  dailyCarbGoal     Int?
+  dailyFatGoal      Int?
+  dailyStepGoal     Int
+  weeklyWorkoutGoal Int
+  startingWeightKg  Decimal?  @db.Decimal(5, 2)
+  targetWeightKg    Decimal?  @db.Decimal(5, 2)
+  startsAt          DateTime  @default(now()) @db.Date
+  endsAt            DateTime? @db.Date
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, isActive])
 }
 
 model DailyLog {
-  id                  String          @id @default(uuid()) @db.Uuid
-  userId              String          @db.Uuid
-  date                DateTime        @db.Date
-  totalCalories       Int             @default(0)
-  totalProtein        Decimal         @default(0) @db.Decimal(8, 2)
-  totalCarbs          Decimal         @default(0) @db.Decimal(8, 2)
-  totalFat            Decimal         @default(0) @db.Decimal(8, 2)
-  totalSteps          Int             @default(0)
-  totalRunKm          Decimal         @default(0) @db.Decimal(8, 2)
-  totalWalkKm         Decimal         @default(0) @db.Decimal(8, 2)
-  totalWorkoutMinutes Int             @default(0)
-  totalBurnedCalories Int             @default(0)
-  waterMl             Int             @default(0)
-  isWorkoutDay        Boolean         @default(false)
-  isOffDay            Boolean         @default(false)
-  dailyScore          Int             @default(0)
+  id                  String           @id @default(uuid()) @db.Uuid
+  userId              String           @db.Uuid
+  date                DateTime         @db.Date
+  totalCalories       Int              @default(0)
+  totalProtein        Decimal          @default(0) @db.Decimal(8, 2)
+  totalCarbs          Decimal          @default(0) @db.Decimal(8, 2)
+  totalFat            Decimal          @default(0) @db.Decimal(8, 2)
+  totalSteps          Int              @default(0)
+  totalRunKm          Decimal          @default(0) @db.Decimal(8, 2)
+  totalWalkKm         Decimal          @default(0) @db.Decimal(8, 2)
+  totalWorkoutMinutes Int              @default(0)
+  totalBurnedCalories Int              @default(0)
+  waterMl             Int              @default(0)
+  isWorkoutDay        Boolean          @default(false)
+  isOffDay            Boolean          @default(false)
+  dailyScore          Int              @default(0)
   note                String?
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
-  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   meals               Meal[]
   activityEntries     ActivityEntry[]
   workoutSessions     WorkoutSession[]
@@ -219,16 +234,16 @@ model FoodAlias {
 }
 
 model Meal {
-  id          String      @id @default(uuid()) @db.Uuid
-  userId      String      @db.Uuid
-  dailyLogId  String      @db.Uuid
-  mealType    MealType
-  date        DateTime    @db.Date
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyLog    DailyLog    @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
-  entries     FoodEntry[]
+  id         String      @id @default(uuid()) @db.Uuid
+  userId     String      @db.Uuid
+  dailyLogId String      @db.Uuid
+  mealType   MealType
+  date       DateTime    @db.Date
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog   DailyLog    @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  entries    FoodEntry[]
 
   @@unique([userId, date, mealType])
   @@index([userId, date])
@@ -329,23 +344,25 @@ model Follow {
 }
 
 model LeaderboardPoint {
-  id            String            @id @default(uuid()) @db.Uuid
-  userId        String            @db.Uuid
-  period        LeaderboardPeriod
-  periodStart   DateTime          @db.Date
-  periodEnd     DateTime          @db.Date
-  score         Int               @default(0)
-  loggingScore  Int               @default(0)
-  goalScore     Int               @default(0)
-  proteinScore  Int               @default(0)
-  stepScore     Int               @default(0)
-  workoutScore  Int               @default(0)
-  streakScore   Int               @default(0)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String                 @id @default(uuid()) @db.Uuid
+  userId       String                 @db.Uuid
+  period       LeaderboardPeriod
+  source       LeaderboardPointSource @default(AGGREGATE)
+  periodStart  DateTime               @db.Date
+  periodEnd    DateTime               @db.Date
+  score        Int                    @default(0)
+  loggingScore Int                    @default(0)
+  goalScore    Int                    @default(0)
+  proteinScore Int                    @default(0)
+  stepScore    Int                    @default(0)
+  workoutScore Int                    @default(0)
+  streakScore  Int                    @default(0)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, period, periodStart])
+  @@unique([userId, period, periodStart, source])
   @@index([period, periodStart, score])
+  @@index([period, periodStart, source])
   @@index([userId])
 }

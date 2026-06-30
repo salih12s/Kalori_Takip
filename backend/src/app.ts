@@ -8,6 +8,7 @@ import { activityRoutes } from "./modules/activity/activity.routes.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.routes.js";
 import { goalsRoutes } from "./modules/goals/goals.routes.js";
+import { leaderboardRoutes } from "./modules/leaderboard/leaderboard.routes.js";
 import { nutritionRoutes } from "./modules/nutrition/nutrition.routes.js";
 import { profilesRoutes } from "./modules/profiles/profiles.routes.js";
 import { socialRoutes } from "./modules/social/social.routes.js";
@@ -31,6 +32,7 @@ app.use("/api", nutritionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api", socialRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
