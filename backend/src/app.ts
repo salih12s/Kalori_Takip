@@ -10,6 +10,7 @@ import { dashboardRoutes } from "./modules/dashboard/dashboard.routes.js";
 import { goalsRoutes } from "./modules/goals/goals.routes.js";
 import { nutritionRoutes } from "./modules/nutrition/nutrition.routes.js";
 import { profilesRoutes } from "./modules/profiles/profiles.routes.js";
+import { socialRoutes } from "./modules/social/social.routes.js";
 import { healthRoutes } from "./modules/system/health.routes.js";
 
 export const app = express();
@@ -29,6 +30,7 @@ app.use("/api/goals", goalsRoutes);
 app.use("/api", nutritionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/activities", activityRoutes);
+app.use("/api", socialRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
