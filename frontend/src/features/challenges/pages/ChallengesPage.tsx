@@ -20,7 +20,7 @@ export function ChallengesPage() {
   return (
     <PageShell>
       <PageHeader
-        title="Meydan Okuma"
+        title="Liderlik Rekabeti"
         description="Arkadaşlarınla hedef belirle, katıl ve ilerlemeni takip et."
         action={
           <button

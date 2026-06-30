@@ -8,7 +8,6 @@ import { routePaths } from "./routes";
 
 const ActivityPage = lazy(() => import("../../features/activity/pages/ActivityPage").then((module) => ({ default: module.ActivityPage })));
 const BadgesPage = lazy(() => import("../../features/gamification/pages/BadgesPage").then((module) => ({ default: module.BadgesPage })));
-const ChallengesPage = lazy(() => import("../../features/challenges/pages/ChallengesPage").then((module) => ({ default: module.ChallengesPage })));
 const DashboardPage = lazy(() => import("../../features/dashboard/pages/DashboardPage").then((module) => ({ default: module.DashboardPage })));
 const FriendsPage = lazy(() => import("../../features/social/pages/FriendsPage").then((module) => ({ default: module.FriendsPage })));
 const LeaderboardPage = lazy(() => import("../../features/leaderboard/pages/LeaderboardPage").then((module) => ({ default: module.LeaderboardPage })));
@@ -50,7 +49,7 @@ export function AppRouter() {
               <Route path={routePaths.nutrition} element={<NutritionPage />} />
               <Route path={routePaths.activity} element={<ActivityPage />} />
               <Route path={routePaths.leaderboard} element={<LeaderboardPage />} />
-              <Route path={routePaths.challenges} element={<ChallengesPage />} />
+              <Route path={routePaths.challenges} element={<Navigate to={routePaths.leaderboard} replace />} />
               <Route path={routePaths.badges} element={<BadgesPage />} />
               <Route path={routePaths.friends} element={<FriendsPage />} />
               <Route path={routePaths.profile} element={<ProfilePage />} />

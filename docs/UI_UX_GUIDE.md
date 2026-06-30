@@ -32,7 +32,6 @@ Within 3 seconds, user should understand:
 - Aktivite
 - Liderlik Tablosu
 - Arkadaşlar
-- Challenge
 - Profil
 - Ayarlar
 
@@ -58,4 +57,3 @@ No data
 - İptal
 - Takip Et
 - Takipten Çık
-- Challenge'a Katıl

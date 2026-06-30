@@ -11,8 +11,8 @@ interface FoodResultCardProps {
 }
 
 const sourceLabels: Record<FoodResultSource, string> = {
-  LOCAL: "Yerel",
-  CACHED: "Önbellekte",
+  LOCAL: "Yemekler",
+  CACHED: "Önbellek",
   EXTERNAL: "Dış Kaynak",
 };
 

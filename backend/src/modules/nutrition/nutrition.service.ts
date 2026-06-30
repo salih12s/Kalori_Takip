@@ -33,6 +33,7 @@ type EntryResult = {
   entry: FoodEntryResponse;
   dailyTotals: DailyTotalsResponse;
 };
+type LocalFood = Awaited<ReturnType<typeof nutritionRepository.searchFoods>>[number];
 
 const mealTypeOrder = [MealType.BREAKFAST, MealType.LUNCH, MealType.DINNER, MealType.SNACK];
 
@@ -93,14 +94,47 @@ function groupMeals(meals: MealResponse[]): Record<MealType, MealResponse | null
   return groupedMeals;
 }
 
+function getSearchScope(source: FoodSearchInput["source"]) {
+  if (source === "curated") return "curated";
+  if (source === "local") return "cache";
+  return "all";
+}
+
+function isTestLikeFoodName(name: string): boolean {
+  return /^(phase|dashboard)\b/i.test(name) || /\d{8,}/.test(name);
+}
+
+function searchRank(food: LocalFood, normalizedQuery: string): number {
+  const aliases = food.aliases.map((alias) => alias.normalizedAlias);
+
+  if (food.normalizedName === normalizedQuery) return 0;
+  if (aliases.includes(normalizedQuery)) return 1;
+  if (food.normalizedName.startsWith(normalizedQuery)) return 2;
+  if (aliases.some((alias) => alias.startsWith(normalizedQuery))) return 3;
+  if (food.normalizedName.includes(normalizedQuery)) return 4;
+  return 5;
+}
+
+function sortLocalFoods(foods: LocalFood[], normalizedQuery: string): LocalFood[] {
+  return [...foods].sort((first, second) => {
+    const firstRank = searchRank(first, normalizedQuery);
+    const secondRank = searchRank(second, normalizedQuery);
+
+    if (firstRank !== secondRank) return firstRank - secondRank;
+    return first.name.localeCompare(second.name, "tr");
+  });
+}
+
 export const nutritionService = {
   async searchFoods(input: FoodSearchInput): Promise<FoodSearchResult> {
     const query = input.q.trim();
     const normalizedQuery = normalizeText(query);
-    const shouldSearchLocal = input.source === "local" || input.source === "all";
+    const shouldSearchLocal = input.source !== "external";
     const shouldSearchExternal = input.source === "external" || input.source === "all";
     const [localFoods, externalResult] = await Promise.all([
-      shouldSearchLocal ? nutritionRepository.searchFoods(query, normalizedQuery) : Promise.resolve([]),
+      shouldSearchLocal
+        ? nutritionRepository.searchFoods(query, normalizedQuery, getSearchScope(input.source))
+        : Promise.resolve([]),
       shouldSearchExternal ? externalFoodProvider.search(query) : Promise.resolve({ foods: [], failed: false })
     ]);
     const cachedExternalIds = new Set(
@@ -109,7 +143,10 @@ export const nutritionService = {
         .filter((externalId): externalId is string => externalId !== null)
     );
     const externalFoods = externalResult.foods.filter((food) => !cachedExternalIds.has(food.externalId));
-    const localResults = localFoods.map(toLocalFoodSearchResult);
+    const localResults = sortLocalFoods(
+      input.source === "curated" ? localFoods.filter((food) => !isTestLikeFoodName(food.name)) : localFoods,
+      normalizedQuery
+    ).map(toLocalFoodSearchResult);
     const externalResults = externalFoods.map(toExternalFoodSearchResult);
     const foods =
       input.source === "all"

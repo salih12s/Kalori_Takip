@@ -4,6 +4,7 @@ import { prisma } from "../../database/prisma.js";
 import type { CreateFoodInput, ImportExternalFoodInput } from "./nutrition.types.js";
 
 const mealTypes = [MealType.BREAKFAST, MealType.LUNCH, MealType.DINNER, MealType.SNACK];
+type FoodSearchScope = "curated" | "cache" | "all";
 
 type FoodEntrySnapshot = {
   foodId: string;
@@ -19,10 +20,25 @@ type FoodEntrySnapshot = {
 };
 
 export const nutritionRepository = {
-  searchFoods(query: string, normalizedQuery: string) {
+  searchFoods(query: string, normalizedQuery: string, scope: FoodSearchScope) {
+    const scopeWhere: Prisma.FoodWhereInput =
+      scope === "curated"
+        ? {
+            userId: null,
+            source: "LOCAL",
+            externalProvider: null,
+            externalId: null
+          }
+        : scope === "cache"
+          ? {
+              OR: [{ source: "OPEN_FOOD_FACTS" }, { source: "USER_CREATED" }, { userId: { not: null } }]
+            }
+          : {};
+
     return prisma.food.findMany({
       where: {
         deletedAt: null,
+        AND: [scopeWhere],
         OR: [
           { name: { contains: query, mode: "insensitive" } },
           { normalizedName: { contains: normalizedQuery, mode: "insensitive" } },
@@ -32,7 +48,7 @@ export const nutritionRepository = {
       },
       include: { aliases: true },
       orderBy: { name: "asc" },
-      take: 20
+      take: 60
     });
   },
 

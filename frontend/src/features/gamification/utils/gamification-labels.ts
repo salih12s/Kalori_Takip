@@ -20,7 +20,7 @@ export const categoryLabels: Record<BadgeCategory, string> = {
   NUTRITION: "Beslenme",
   ACTIVITY: "Aktivite",
   SOCIAL: "Sosyal",
-  CHALLENGE: "Challenge",
+  CHALLENGE: "Liderlik",
   STREAK: "Seri",
   SCORE: "Puan",
 };

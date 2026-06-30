@@ -2,10 +2,17 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 const sessionKey = "saydamfitness_intro_seen";
+const desktopVideo = "/branding/saydamfitness-intro.mp4";
+const mobileVideo = "/branding/saydamfitness-intro-mobile.mp4";
+
+function getIntroVideoSource() {
+  return window.matchMedia("(max-width: 768px)").matches ? mobileVideo : desktopVideo;
+}
 
 export function SplashVideo() {
   const [visible, setVisible] = useState(() => sessionStorage.getItem(sessionKey) !== "true");
   const [canSkip, setCanSkip] = useState(false);
+  const [videoSource] = useState(getIntroVideoSource);
 
   useEffect(() => {
     if (!visible) return;
@@ -33,7 +40,7 @@ export function SplashVideo() {
           className="fixed inset-0 z-[100] grid place-items-center bg-stone-950"
         >
           <video
-            src="/branding/saydamfitness-intro.mp4"
+            src={videoSource}
             className="h-full w-full object-cover"
             autoPlay
             muted

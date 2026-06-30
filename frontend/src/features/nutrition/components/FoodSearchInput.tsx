@@ -60,12 +60,13 @@ function toSearchResult(food: FoodResponse): FoodSearchResult {
 export function FoodSearchInput({ onSelect }: FoodSearchInputProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [source, setSource] = useState<FoodSearchSource>("external");
+  const [source, setSource] = useState<FoodSearchSource>("curated");
   const searchQuery = useFoodSearch(debouncedQuery, source);
   const importMutation = useImportExternalFood();
   const foods = searchQuery.data?.foods ?? [];
   const externalFoods = useMemo(() => foods.filter((food) => food.source === "EXTERNAL"), [foods]);
   const cachedFoods = useMemo(() => foods.filter((food) => food.source !== "EXTERNAL"), [foods]);
+  const isExternalSource = source === "external";
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(query), 300);
@@ -96,7 +97,7 @@ export function FoodSearchInput({ onSelect }: FoodSearchInputProps) {
 
       <FoodSourceTabs value={source} onChange={setSource} />
 
-      {searchQuery.data?.externalSearchFailed ? (
+      {isExternalSource && searchQuery.data?.externalSearchFailed ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
           {cachedFoods.length > 0
             ? "Dış kaynak araması başarısız oldu. Önbellekteki sonuçlar gösteriliyor."
@@ -108,10 +109,27 @@ export function FoodSearchInput({ onSelect }: FoodSearchInputProps) {
         <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
           {searchQuery.isLoading ? (
             <p className="rounded-lg border border-stone-200 bg-white px-3 py-3 text-sm text-stone-500">
-              Dış kaynakta aranıyor...
+              Yemekler aranıyor...
             </p>
           ) : foods.length > 0 ? (
             <AnimatePresence initial={false}>
+              {cachedFoods.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    {source === "curated" ? "Yemekler" : "Önbellek"}
+                  </p>
+                  {cachedFoods.map((food) => (
+                    <FoodResultCard
+                      key={food.id ?? food.externalId}
+                      food={food}
+                      isImporting={false}
+                      onSelect={onSelect}
+                      onImport={handleImport}
+                    />
+                  ))}
+                </div>
+              ) : null}
+
               {externalFoods.length > 0 ? (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">Dış Kaynak</p>
@@ -120,21 +138,6 @@ export function FoodSearchInput({ onSelect }: FoodSearchInputProps) {
                       key={food.externalId}
                       food={food}
                       isImporting={importMutation.isPending}
-                      onSelect={onSelect}
-                      onImport={handleImport}
-                    />
-                  ))}
-                </div>
-              ) : null}
-
-              {cachedFoods.length > 0 ? (
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">Önbellekteki Yemekler</p>
-                  {cachedFoods.map((food) => (
-                    <FoodResultCard
-                      key={food.id ?? food.externalId}
-                      food={food}
-                      isImporting={false}
                       onSelect={onSelect}
                       onImport={handleImport}
                     />

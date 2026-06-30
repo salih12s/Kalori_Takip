@@ -1,6 +1,6 @@
 # FitBoard / KaloriTakip
 
-FitBoard, arkadaş grupları için geliştirilmiş sosyal kalori, makro, aktivite, challenge, rozet ve liderlik takibi uygulamasıdır.
+FitBoard, arkadaş grupları için geliştirilmiş sosyal kalori, makro, aktivite, rozet ve liderlik takibi uygulamasıdır.
 
 ## Tech Stack
 
@@ -23,13 +23,14 @@ Frontend:
 - Kayıt, giriş ve JWT tabanlı oturum
 - Profil ve hedef yönetimi
 - Yemek günlüğü, kalori ve makro takibi
-- Open Food Facts ile dış kaynak yemek arama ve cache/import akışı
+- Curated Türkçe yemek veritabanı ve opsiyonel dış kaynak import akışı
 - Aktivite, su, antrenman ve dinlenme günü takibi
 - Dashboard, haftalık özet ve disiplin skoru
 - Arkadaş takip sistemi ve gizlilik kontrolleri
 - Liderlik tablosu
-- Challenge sistemi
 - Rozetler ve streak/gamification özeti
+
+Not: Challenge backend ve veritabanı yapısı korunur, ancak Challenge UI normal kullanıcı akışından gizlenmiştir. Arkadaş rekabeti Liderlik Tablosu üzerinden ilerler.
 
 ## Local Setup
 
@@ -82,6 +83,7 @@ Run Prisma commands from `backend/`:
 ```bash
 npm run prisma:generate
 npm run prisma:migrate
+npm run seed:foods
 ```
 
 Check migration status:

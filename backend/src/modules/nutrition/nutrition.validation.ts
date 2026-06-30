@@ -8,7 +8,7 @@ export const dateOnlySchema = z
 
 export const foodSearchSchema = z.object({
   q: z.string().trim().min(1).max(80),
-  source: z.enum(["all", "local", "external"]).optional().default("local")
+  source: z.enum(["curated", "all", "local", "external"]).optional().default("curated")
 });
 
 export const importExternalFoodSchema = z

@@ -6,9 +6,9 @@ interface FoodSourceTabsProps {
 }
 
 const sourceOptions: Array<{ value: FoodSearchSource; label: string }> = [
-  { value: "external", label: "Dış kaynakta ara" },
-  { value: "all", label: "Tümü" },
+  { value: "curated", label: "Yemekler" },
   { value: "local", label: "Önbellek" },
+  { value: "external", label: "Dış Kaynak" },
 ];
 
 export function FoodSourceTabs({ value, onChange }: FoodSourceTabsProps) {

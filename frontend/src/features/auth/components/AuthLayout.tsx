@@ -34,7 +34,7 @@ export function AuthLayout() {
     <div className="grid min-h-screen place-items-center bg-stone-50 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center">
-          <AppLogo />
+          <AppLogo size="lg" showText />
         </div>
         <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <Outlet />

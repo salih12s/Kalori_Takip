@@ -1,6 +1,6 @@
 export type MealType = "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
 export type FoodSource = "LOCAL" | "USER_CREATED" | "USDA" | "OPEN_FOOD_FACTS";
-export type FoodSearchSource = "all" | "local" | "external";
+export type FoodSearchSource = "curated" | "all" | "local" | "external";
 export type FoodResultSource = "LOCAL" | "CACHED" | "EXTERNAL";
 
 export interface FoodResponse {
