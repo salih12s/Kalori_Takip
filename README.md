@@ -69,7 +69,31 @@ Frontend example: `frontend/.env.example`
 
 ```env
 VITE_API_URL="http://localhost:5000/api"
+VITE_SOCKET_URL="http://localhost:5000"
 ```
+
+### Local Env Switching
+
+Safe templates are committed:
+
+```bash
+set-local-env.example.bat
+set-production-env.example.bat
+```
+
+Real local scripts are intentionally ignored by Git:
+
+```bash
+set-local-env.bat
+set-production-env.bat
+*.local.bat
+```
+
+Use the examples as templates and keep real passwords, JWT secrets and Railway proxy values only in ignored local files. Never commit real `.env` files or `.bat` files that contain secrets.
+
+`set-local-env.bat` writes local development `backend/.env` and `frontend/.env` values.
+
+`set-production-env.bat` is only for local production-like testing with placeholder values replaced in the ignored local file.
 
 ## Database
 
@@ -147,6 +171,46 @@ npm run preview
 - Run Prisma migrations before serving the backend.
 - Set frontend `VITE_API_URL` to the deployed backend API URL.
 - Set backend `FRONTEND_URL` to the deployed frontend URL.
+
+### Railway Backend Service
+
+Railway should deploy the backend service from the backend folder, not the repository root.
+
+Recommended backend service settings:
+
+```txt
+Root Directory: backend
+Build Command: npm ci && npm run prisma:generate && npm run build
+Start Command: npm run start:prod
+```
+
+Required Railway backend variables:
+
+```txt
+DATABASE_URL=${{ Postgres.DATABASE_URL }}
+JWT_SECRET=strong production secret
+NODE_ENV=production
+FRONTEND_URL=https://frontend-domain
+CLIENT_URL=https://frontend-domain
+```
+
+Do not set Railway `DATABASE_URL` to localhost. Railway Postgres provides `DATABASE_URL`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD` and `PGDATABASE` from the Postgres service.
+
+### DBeaver Railway DB Connection
+
+For DBeaver, use Railway's public TCP proxy or `DATABASE_PUBLIC_URL`, not the internal service host.
+
+Use host mode:
+
+```txt
+Host: RAILWAY_TCP_PROXY_DOMAIN
+Port: RAILWAY_TCP_PROXY_PORT
+Database: PGDATABASE, usually railway
+Username: PGUSER, usually postgres
+Password: PGPASSWORD
+```
+
+Do not use `localhost` for Railway DB. Do not use `postgres.railway.internal` from DBeaver; that host is for Railway internal services. If DBeaver has `Database=postgres` while Railway `PGDATABASE=railway`, change it to `railway`.
 
 ## Security
 

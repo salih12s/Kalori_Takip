@@ -14,7 +14,7 @@ export type FollowRequestEvent = {
 };
 
 export function createRealtimeSocket(token: string): Socket {
-  return io(env.apiUrl.replace(/\/api$/, ""), {
+  return io(env.socketUrl, {
     auth: { token },
     transports: ["websocket", "polling"],
   });

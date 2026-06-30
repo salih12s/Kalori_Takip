@@ -4,6 +4,17 @@ build/
 .env
 .env.*
 !.env.example
+!backend/.env.example
+!frontend/.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+set-local-env.bat
+set-production-env.bat
+*.local.bat
 *.local
 *.secret
 *.secrets

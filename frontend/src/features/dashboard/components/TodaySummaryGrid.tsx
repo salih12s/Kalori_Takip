@@ -27,21 +27,24 @@ export function TodaySummaryGrid({ dashboard }: TodaySummaryGridProps) {
         : "Kalan Kalori";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-      <CaloriesCard nutrition={nutrition} goal={goal} />
-      <StatCard title="Kalan Kalori" value={remainingValue} suffix="kcal" description={remainingDescription} icon={Flame} />
-      <MacroSummaryCard nutrition={nutrition} />
-      <StatCard title="Karbonhidrat" value={nutrition.totalCarbs} suffix="g" progress={nutrition.carbProgress} icon={Activity} />
-      <StatCard title="Yağ" value={nutrition.totalFat} suffix="g" progress={nutrition.fatProgress} icon={Droplets} />
-      <ActivitySummaryCard activity={activity} />
-      <StatCard
-        title="Spor Durumu"
-        value={activity.isOffDay ? "Dinlenme" : activity.isWorkoutDay ? "Spor" : "Bekliyor"}
-        description={`Spor Süresi: ${activity.totalWorkoutMinutes} dk · Yakılan Kalori: ${activity.totalBurnedCalories}`}
-        icon={Dumbbell}
-      />
+    <section className="space-y-4">
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <CaloriesCard nutrition={nutrition} goal={goal} />
+        <StatCard title="Kalan Kalori" value={remainingValue} suffix="kcal" description={remainingDescription} icon={Flame} />
+        <MacroSummaryCard nutrition={nutrition} />
+        <StatCard title="Karbonhidrat" value={nutrition.totalCarbs} suffix="g" progress={nutrition.carbProgress} icon={Activity} />
+        <StatCard title="Yağ" value={nutrition.totalFat} suffix="g" progress={nutrition.fatProgress} icon={Droplets} />
+        <ActivitySummaryCard activity={activity} />
+        <StatCard
+          title="Spor Durumu"
+          value={activity.isOffDay ? "Dinlenme" : activity.isWorkoutDay ? "Spor" : "Bekliyor"}
+          description={`Spor Süresi: ${activity.totalWorkoutMinutes} dk · Yakılan Kalori: ${activity.totalBurnedCalories}`}
+          icon={Dumbbell}
+        />
+        <StatCard title="Adım Hedefi" value={`${activity.stepProgress}%`} description={`Hedef: ${activity.stepGoal ?? "—"}`} icon={Footprints} />
+      </div>
+
       <DailyStatusCard status={status} isWorkoutDay={activity.isWorkoutDay} isOffDay={activity.isOffDay} />
-      <StatCard title="Adım Hedefi" value={`${activity.stepProgress}%`} description={`Hedef: ${activity.stepGoal ?? "—"}`} icon={Footprints} />
-    </div>
+    </section>
   );
 }

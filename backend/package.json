@@ -9,8 +9,10 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "seed:foods": "tsx prisma/seed-foods.ts"
+    "seed:foods": "tsx prisma/seed-foods.ts",
+    "start:prod": "npm run prisma:migrate:deploy && npm run seed:foods && npm run start"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
