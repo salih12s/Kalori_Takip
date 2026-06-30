@@ -1,25 +1,28 @@
-import { Settings } from "lucide-react";
-
 import { PageShell } from "../../../components/layout/PageShell";
-import { EmptyState } from "../../../components/shared/EmptyState";
 import { PageHeader } from "../../../components/shared/PageHeader";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { AccountSettingsCard } from "../components/AccountSettingsCard";
+import { AppPreferencesCard } from "../components/AppPreferencesCard";
+import { SettingsSkeleton } from "../components/SettingsSkeleton";
 
-/**
- * Placeholder settings page. App preferences arrive in a later phase.
- */
 export function SettingsPage() {
+  const { isLoading } = useAuth();
+
   return (
     <PageShell>
       <PageHeader
         title="Ayarlar"
-        description="Uygulama tercihlerini buradan düzenle."
+        description="Uygulama tercihlerini ve hesap ayarlarını buradan yönet."
       />
 
-      <EmptyState
-        icon={Settings}
-        title="Ayarlar henüz hazır değil"
-        description="Uygulama tercihlerin burada yer alacak. Bu sayfa ileriki bir adımda aktif olacak."
-      />
+      {isLoading ? (
+        <SettingsSkeleton />
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-2">
+          <AccountSettingsCard />
+          <AppPreferencesCard />
+        </div>
+      )}
     </PageShell>
   );
 }
