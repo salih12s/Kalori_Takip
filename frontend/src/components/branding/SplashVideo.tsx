@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 const sessionKey = "saydamfitness_intro_seen";
 const desktopVideo = "/branding/saydamfitness-intro.mp4";
-const mobileVideo = "/branding/saydamfitness-intro-mobile.mp4";
+const mobileVideo = "/branding/saydamfitness-intro-mobile-v2.mp4";
 
 function getIntroVideoSource() {
   return window.matchMedia("(max-width: 768px)").matches ? mobileVideo : desktopVideo;
