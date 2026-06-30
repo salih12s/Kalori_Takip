@@ -5,6 +5,7 @@ import { ActivityPage } from "../../features/activity/pages/ActivityPage";
 import { AuthLayout } from "../../features/auth/components/AuthLayout";
 import { ChallengesPage } from "../../features/challenges/pages/ChallengesPage";
 import { ProtectedRoute } from "../../features/auth/components/ProtectedRoute";
+import { BadgesPage } from "../../features/gamification/pages/BadgesPage";
 import { LoginPage } from "../../features/auth/pages/LoginPage";
 import { RegisterPage } from "../../features/auth/pages/RegisterPage";
 import { DashboardPage } from "../../features/dashboard/pages/DashboardPage";
@@ -39,6 +40,7 @@ export function AppRouter() {
             <Route path={routePaths.activity} element={<ActivityPage />} />
             <Route path={routePaths.leaderboard} element={<LeaderboardPage />} />
             <Route path={routePaths.challenges} element={<ChallengesPage />} />
+            <Route path={routePaths.badges} element={<BadgesPage />} />
             <Route path={routePaths.friends} element={<FriendsPage />} />
             <Route path={routePaths.profile} element={<ProfilePage />} />
             <Route path={routePaths.settings} element={<SettingsPage />} />

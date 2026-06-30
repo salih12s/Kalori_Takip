@@ -33,14 +33,17 @@ export function toFollowResponse(follow: Follow): FollowResponse {
   };
 }
 
-export function toPublicProfile(user: UserWithProfile, stats?: { todayStepTotal: number; weeklyScore: number }): PublicProfileResponse {
+export function toPublicProfile(
+  user: UserWithProfile,
+  stats?: { todayStepTotal: number; weeklyScore: number; currentStreak: number }
+): PublicProfileResponse {
   return {
     userId: user.id,
     username: user.username,
     fullName: user.profile?.fullName ?? null,
     avatarUrl: user.profile?.avatarUrl ?? null,
     privacyLevel: user.profile?.privacyLevel ?? "FRIENDS",
-    ...(stats ? { ...stats, currentStreak: 0 } : {})
+    ...(stats ? { ...stats } : {})
   };
 }
 

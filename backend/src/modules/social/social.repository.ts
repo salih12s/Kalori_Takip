@@ -106,6 +106,22 @@ export const socialRepository = {
     });
   },
 
+  getStreakLogs(userId: string) {
+    return prisma.dailyLog.findMany({
+      where: { userId },
+      select: {
+        date: true,
+        totalCalories: true,
+        totalSteps: true,
+        isWorkoutDay: true,
+        isOffDay: true,
+        waterMl: true,
+        dailyScore: true
+      },
+      orderBy: { date: "asc" }
+    });
+  },
+
   getWeeklyScore(userId: string, startDate: Date) {
     return prisma.leaderboardPoint.findFirst({
       where: { userId, period: "WEEKLY", periodStart: startDate }

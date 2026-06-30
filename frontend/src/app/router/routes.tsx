@@ -1,5 +1,6 @@
 import {
   Activity,
+  Award,
   LayoutDashboard,
   Settings,
   Swords,
@@ -20,6 +21,7 @@ export const routePaths = {
   activity: "/activity",
   leaderboard: "/leaderboard",
   challenges: "/challenges",
+  badges: "/badges",
   friends: "/friends",
   profile: "/profile",
   settings: "/settings",
@@ -39,6 +41,7 @@ export const navItems: NavItem[] = [
   { to: routePaths.activity, label: "Aktivite", icon: Activity },
   { to: routePaths.leaderboard, label: "Liderlik", icon: Trophy },
   { to: routePaths.challenges, label: "Meydan Okuma", icon: Swords },
+  { to: routePaths.badges, label: "Rozetler", icon: Award },
   { to: routePaths.friends, label: "Arkadaşlar", icon: Users },
   { to: routePaths.profile, label: "Profil", icon: User },
   { to: routePaths.settings, label: "Ayarlar", icon: Settings },

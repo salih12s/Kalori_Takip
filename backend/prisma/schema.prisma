@@ -114,6 +114,30 @@ enum ChallengeMemberStatus {
   COMPLETED
 }
 
+enum BadgeCategory {
+  NUTRITION
+  ACTIVITY
+  SOCIAL
+  CHALLENGE
+  STREAK
+  SCORE
+}
+
+enum BadgeTriggerType {
+  FIRST_FOOD_LOG
+  FIRST_ACTIVITY
+  FIRST_WORKOUT
+  FIRST_WATER
+  STEP_DAY
+  RUN_DISTANCE_DAY
+  CALORIE_GOAL_DAY
+  PROTEIN_GOAL_DAY
+  STREAK_DAYS
+  CHALLENGE_COMPLETED
+  DAILY_SCORE
+  FIRST_FRIEND
+}
+
 model User {
   id                   String             @id @default(uuid()) @db.Uuid
   email                String             @unique
@@ -135,6 +159,7 @@ model User {
   leaderboardPoints    LeaderboardPoint[]
   createdChallenges    Challenge[]        @relation("ChallengeCreator")
   challengeMemberships ChallengeMember[]
+  userBadges           UserBadge[]
 
   @@index([email])
   @@index([username])
@@ -424,4 +449,35 @@ model ChallengeMember {
   @@unique([challengeId, userId])
   @@index([userId])
   @@index([challengeId])
+}
+
+model Badge {
+  id           String           @id @default(uuid()) @db.Uuid
+  code         String           @unique
+  title        String
+  description  String
+  icon         String
+  category     BadgeCategory
+  triggerType  BadgeTriggerType
+  triggerValue Int?
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  userBadges   UserBadge[]
+
+  @@index([category])
+}
+
+model UserBadge {
+  id       String   @id @default(uuid()) @db.Uuid
+  userId   String   @db.Uuid
+  badgeId  String   @db.Uuid
+  earnedAt DateTime @default(now())
+  metadata Json?
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
 }

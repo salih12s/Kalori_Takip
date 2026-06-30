@@ -2,6 +2,7 @@ import { LeaderboardPointSource } from "@prisma/client";
 
 import { AppError } from "../../shared/errors/app-error.js";
 import { addDays, formatDateOnly, startOfWeek, todayDateOnly } from "../../shared/utils/date.js";
+import { computeStreaks, type StreakSignalLog } from "../../shared/utils/streak.js";
 import {
   formatRange,
   mapLeaderboardRow,
@@ -202,6 +203,8 @@ export const leaderboardService = {
     const week = await this.getWeekly(userId, startOfWeek(today));
     const month = await this.getMonthly(userId, formatDateOnly(today).slice(0, 7));
     const todayPoints = await leaderboardRepository.getDailyPoints(userId, today);
+    const streakLogs = await leaderboardRepository.getStreakLogs(userId);
+    const { currentStreak } = computeStreaks(streakLogs as StreakSignalLog[]);
     const currentWeeklyRow = week.rows.find((row) => row.user.id === userId);
     const currentMonthlyRow = month.rows.find((row) => row.user.id === userId);
 
@@ -212,7 +215,7 @@ export const leaderboardService = {
       weeklyRank: currentWeeklyRow?.rank ?? null,
       monthlyRank: currentMonthlyRow?.rank ?? null,
       pointsBreakdown: todayPoints.map(mapStoredPoint),
-      currentStreak: 0
+      currentStreak
     };
   }
 };

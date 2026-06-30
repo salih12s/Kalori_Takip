@@ -8,6 +8,7 @@ import { activityRoutes } from "./modules/activity/activity.routes.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { challengesRoutes } from "./modules/challenges/challenges.routes.js";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.routes.js";
+import { gamificationRoutes } from "./modules/gamification/gamification.routes.js";
 import { goalsRoutes } from "./modules/goals/goals.routes.js";
 import { leaderboardRoutes } from "./modules/leaderboard/leaderboard.routes.js";
 import { nutritionRoutes } from "./modules/nutrition/nutrition.routes.js";
@@ -35,6 +36,7 @@ app.use("/api/activities", activityRoutes);
 app.use("/api", socialRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/challenges", challengesRoutes);
+app.use("/api/gamification", gamificationRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

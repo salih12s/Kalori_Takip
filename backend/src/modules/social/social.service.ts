@@ -2,6 +2,7 @@ import { FollowStatus, PrivacyLevel } from "@prisma/client";
 
 import { AppError } from "../../shared/errors/app-error.js";
 import { startOfWeek, todayDateOnly } from "../../shared/utils/date.js";
+import { computeStreaks, type StreakSignalLog } from "../../shared/utils/streak.js";
 import {
   toFollowResponse,
   toFriendSummary,
@@ -132,15 +133,18 @@ export const socialService = {
     }
 
     const today = todayDateOnly();
-    const [dailyLog, weeklyPoint] = await Promise.all([
+    const [dailyLog, weeklyPoint, streakLogs] = await Promise.all([
       socialRepository.getTodayStats(targetUserId, today),
-      socialRepository.getWeeklyScore(targetUserId, startOfWeek(today))
+      socialRepository.getWeeklyScore(targetUserId, startOfWeek(today)),
+      socialRepository.getStreakLogs(targetUserId)
     ]);
+    const { currentStreak } = computeStreaks(streakLogs as StreakSignalLog[]);
 
     return {
       profile: toPublicProfile(targetUser, {
         todayStepTotal: dailyLog?.totalSteps ?? 0,
-        weeklyScore: weeklyPoint?.score ?? 0
+        weeklyScore: weeklyPoint?.score ?? 0,
+        currentStreak
       })
     };
   }
