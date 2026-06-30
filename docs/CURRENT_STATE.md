@@ -2,100 +2,105 @@
 
 ## Phase
 
-Phase 10 - Frontend dashboard data wiring is implemented.
+Phase 11 - Frontend nutrition page is implemented.
 
 ## Completed work
 
-- Connected the Dashboard page to real backend data:
-  - `GET /api/dashboard/today`
-  - `GET /api/dashboard/weekly`
-- Added dashboard feature API client:
-  - `frontend/src/features/dashboard/api/dashboard.api.ts`
+- Connected the Nutrition / Yemek Günlüğü page to real backend nutrition endpoints:
+  - `GET /api/foods/search?q=...`
+  - `POST /api/foods`
+  - `GET /api/meals?date=YYYY-MM-DD`
+  - `POST /api/meals/entries`
+  - `DELETE /api/meals/entries/:entryId`
+- Added nutrition feature API client:
+  - `frontend/src/features/nutrition/api/nutrition.api.ts`
 - Added TanStack Query hooks:
-  - `useTodayDashboard(date?)`
-  - `useWeeklyDashboard(startDate?)`
-- Added dashboard TypeScript types matching the backend response.
-- Replaced the Phase 8 placeholder Dashboard page with real data rendering.
-- Added dashboard components:
-  - `TodaySummaryGrid`
-  - `CaloriesCard`
-  - `MacroSummaryCard`
-  - `ActivitySummaryCard`
-  - `DailyStatusCard`
-  - `MealsPreviewCard`
-  - `WeeklySummarySection`
-  - `DashboardSkeleton`
-- Dashboard now shows real:
-  - calories
-  - remaining calories
-  - protein
-  - carbs
-  - fat
-  - steps
-  - run/walk distance
-  - workout minutes
-  - burned calories
-  - water amount
-  - daily score
-  - meal preview
-  - weekly totals and 7-day list
+  - `useDailyMeals(date)`
+  - `useFoodSearch(query)`
+  - `useAddFoodEntry()`
+  - `useDeleteFoodEntry(date)`
+  - `useCreateFood()`
+- Added Zod schemas for:
+  - adding a food entry
+  - creating a local food
+- Replaced the placeholder Nutrition page with real data rendering.
+- Added date selection; default date is today.
+- Added daily nutrition summary cards:
+  - Toplam Kalori
+  - Protein
+  - Karbonhidrat
+  - Yağ
+- Added meal tabs for:
+  - Kahvaltı
+  - Öğle
+  - Akşam
+  - Ara Öğün
+- Added meal cards with entry count, calories, empty state, and `Yemek Ekle` action.
+- Added food search with debounced query and real backend results.
+- Added add-food-entry dialog.
+- Added create-food dialog for local/user-created foods.
+- Added food entry delete action.
+- Mutations invalidate nutrition meals queries and dashboard queries so totals can refresh.
 - Added loading and error states:
-  - `DashboardSkeleton` while dashboard data loads
-  - `ErrorState` with Turkish copy if dashboard data cannot be fetched
-- Kept dashboard page modular and under code-size limits.
+  - `NutritionSkeleton`
+  - `ErrorState` with Turkish copy
 - No backend code was changed.
 - No Prisma schema change was made.
-- Nutrition, activity, social, and leaderboard frontend pages were not implemented in this phase.
+- Activity, social, and leaderboard frontend pages were not implemented in this phase.
+- External food API integration, barcode scanner, and AI food recognition were not added.
 
-## Dashboard behavior decision
+## Nutrition behavior decision
 
-The dashboard uses simple cards and a 7-day list instead of adding a chart in Phase 10. This keeps the first real data wiring small, stable, and easy to verify.
+The page uses meal tabs instead of rendering all meal sections at once. This keeps the first nutrition UI focused and compact while still covering all meal types.
 
-The today card grid uses the required responsive pattern:
-
-```tsx
-className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
-```
+Food creation is local/manual only. Created foods are searchable through the existing backend search endpoint; no external API or barcode/AI workflow was added.
 
 ## Changed files
 
-- `frontend/src/features/dashboard/api/dashboard.api.ts`
-- `frontend/src/features/dashboard/components/ActivitySummaryCard.tsx`
-- `frontend/src/features/dashboard/components/CaloriesCard.tsx`
-- `frontend/src/features/dashboard/components/DailyStatusCard.tsx`
-- `frontend/src/features/dashboard/components/DashboardSkeleton.tsx`
-- `frontend/src/features/dashboard/components/MacroSummaryCard.tsx`
-- `frontend/src/features/dashboard/components/MealsPreviewCard.tsx`
-- `frontend/src/features/dashboard/components/TodaySummaryGrid.tsx`
-- `frontend/src/features/dashboard/components/WeeklySummarySection.tsx`
-- `frontend/src/features/dashboard/hooks/useTodayDashboard.ts`
-- `frontend/src/features/dashboard/hooks/useWeeklyDashboard.ts`
-- `frontend/src/features/dashboard/pages/DashboardPage.tsx`
-- `frontend/src/features/dashboard/types/dashboard.types.ts`
+- `frontend/src/features/nutrition/api/nutrition.api.ts`
+- `frontend/src/features/nutrition/components/AddFoodEntryDialog.tsx`
+- `frontend/src/features/nutrition/components/CreateFoodDialog.tsx`
+- `frontend/src/features/nutrition/components/DailyNutritionSummary.tsx`
+- `frontend/src/features/nutrition/components/FoodEntryItem.tsx`
+- `frontend/src/features/nutrition/components/FoodSearchInput.tsx`
+- `frontend/src/features/nutrition/components/MealCard.tsx`
+- `frontend/src/features/nutrition/components/MealTabs.tsx`
+- `frontend/src/features/nutrition/components/NutritionSkeleton.tsx`
+- `frontend/src/features/nutrition/hooks/useAddFoodEntry.ts`
+- `frontend/src/features/nutrition/hooks/useCreateFood.ts`
+- `frontend/src/features/nutrition/hooks/useDailyMeals.ts`
+- `frontend/src/features/nutrition/hooks/useDeleteFoodEntry.ts`
+- `frontend/src/features/nutrition/hooks/useFoodSearch.ts`
+- `frontend/src/features/nutrition/pages/NutritionPage.tsx`
+- `frontend/src/features/nutrition/schemas/nutrition.schema.ts`
+- `frontend/src/features/nutrition/types/nutrition.types.ts`
+- `frontend/src/features/nutrition/utils/meal-labels.ts`
 - `docs/CURRENT_STATE.md`
 
-Removed `.gitkeep` files from populated dashboard folders:
+Removed `.gitkeep` files from populated nutrition folders:
 
-- `frontend/src/features/dashboard/api/.gitkeep`
-- `frontend/src/features/dashboard/components/.gitkeep`
-- `frontend/src/features/dashboard/hooks/.gitkeep`
-- `frontend/src/features/dashboard/types/.gitkeep`
+- `frontend/src/features/nutrition/api/.gitkeep`
+- `frontend/src/features/nutrition/components/.gitkeep`
+- `frontend/src/features/nutrition/hooks/.gitkeep`
+- `frontend/src/features/nutrition/schemas/.gitkeep`
+- `frontend/src/features/nutrition/types/.gitkeep`
+- `frontend/src/features/nutrition/utils/.gitkeep`
 
 ## Commands run
 
 ```bash
 npm run build
-npm run preview -- --host 127.0.0.1 --port 4181 --strictPort
+npm run preview -- --host 127.0.0.1 --port 4182 --strictPort
 ```
 
 Backend was started locally with `node dist/server.js` only when port `5000` was not already listening.
 
-## Dashboard data check results
+## Nutrition flow check results
 
 - `npm run build` passed.
-- Vite preview served the built frontend on port `4181`.
+- Vite preview served the built frontend on port `4182`.
 - Preview route smoke checks returned HTTP 200:
-  - `/dashboard`
+  - `/nutrition`
   - `/login`
 - Backend health check passed:
   - `GET /api/health`
@@ -103,43 +108,31 @@ Backend was started locally with `node dist/server.js` only when port `5000` was
 - The test user was seeded with:
   - profile
   - active goal
-  - one food entry
-  - run activity
-  - walk activity
-  - workout session
-  - water entry
-  - recalculated leaderboard score
-- `GET /api/dashboard/today` returned real values:
-  - calories: `1150`
-  - remaining calories: `1150`
-  - protein: `70`
-  - steps: `10000`
-  - run distance: `3.5`
-  - walk distance: `2`
-  - workout minutes: `45`
-  - burned calories: `670`
-  - water: `1500`
-  - daily score: `53`
-  - meal preview count: `1`
-- `GET /api/dashboard/weekly` returned real values:
-  - total calories: `1150`
-  - total steps: `10000`
-  - total score: `53`
-  - days returned: `7`
+- Nutrition API flow passed:
+  - `GET /api/meals?date=2026-06-30` returned initial daily totals.
+  - `POST /api/foods` created a local food.
+  - `GET /api/foods/search?q=phase11` returned the created food.
+  - `POST /api/meals/entries` added the food to `BREAKFAST`.
+  - Daily calories updated from `0` to `140`.
+  - Breakfast entry count updated from `0` to `1`.
+  - `DELETE /api/meals/entries/:entryId` deleted the food entry.
+  - Daily calories updated back to `0`.
+  - Breakfast entry count updated back to `0`.
 - Backend diff check showed no backend files changed.
 - `frontend/.env` remains ignored by Git.
-- File size check passed; largest dashboard file is `dashboard.types.ts` at 114 lines.
+- File size check passed; largest nutrition file is `CreateFoodDialog.tsx` at 153 lines.
+- User-facing text in nutrition files was checked for mojibake patterns and passed.
 
 ## Known issues
 
-- Full browser automation is not installed in this workspace, so authenticated client-side redirect behavior was verified by code path and route smoke checks rather than a real browser automation run.
+- Full browser automation is not installed in this workspace, so client-side redirect behavior was verified by code path and route smoke checks rather than a real browser automation run.
 - Vite still reports a chunk-size warning after build (`>500 kB` minified JS). The build succeeds; code splitting can be handled in a later optimization phase.
-- Dashboard data is real, but nutrition/activity/social/leaderboard frontend pages are still placeholders by design.
+- Nutrition page is connected to backend data, but activity, social, and leaderboard frontend pages are still placeholders by design.
 - `currentStreak` is still returned as `0` by the backend because streak calculation has not been implemented yet.
 
 ## Current phase status
 
-Phase 10 (frontend dashboard data wiring) is complete and builds successfully.
+Phase 11 (frontend nutrition page) is complete and builds successfully.
 
 ## Git commits
 
@@ -153,8 +146,9 @@ Phase 10 (frontend dashboard data wiring) is complete and builds successfully.
 - `7337d11 feat: add leaderboard backend module`
 - `a3bb68c feat: add frontend base layout`
 - `e106343 feat: add frontend auth and onboarding`
-- `feat: connect dashboard to backend data`
+- `4519b4c feat: connect dashboard to backend data`
+- `feat: connect nutrition page to backend`
 
 ## Next recommended step
 
-Review the real dashboard data UI, then start the next frontend feature page only when explicitly requested.
+Review the nutrition logging UI, then start the activity frontend page only when explicitly requested.
