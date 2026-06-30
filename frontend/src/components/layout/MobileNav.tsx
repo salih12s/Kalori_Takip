@@ -4,12 +4,12 @@ import { navItems } from "../../app/router/routes";
 import { cn } from "../../lib/cn";
 
 /**
- * Bottom navigation for mobile. Uses a fixed 8-column grid so it never
+ * Bottom navigation for mobile. Uses compact equal columns so it never
  * overflows or shifts layout on small screens.
  */
 export function MobileNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-8 border-t border-stone-200 bg-white/95 backdrop-blur lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-8 border-t border-stone-200 bg-white/95 backdrop-blur dark:border-stone-800 dark:bg-stone-900/95 lg:hidden">
       {navItems.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
@@ -17,7 +17,7 @@ export function MobileNav() {
           className={({ isActive }) =>
             cn(
               "flex flex-col items-center gap-1 px-1 py-2 text-[10px] font-medium transition-colors",
-              isActive ? "text-emerald-600" : "text-stone-500"
+              isActive ? "text-emerald-600 dark:text-emerald-300" : "text-stone-500 dark:text-stone-300"
             )
           }
         >

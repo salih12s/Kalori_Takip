@@ -23,12 +23,13 @@ Frontend:
 - Kayıt, giriş ve JWT tabanlı oturum
 - Profil ve hedef yönetimi
 - Yemek günlüğü, kalori ve makro takibi
-- Curated Türkçe yemek veritabanı ve opsiyonel dış kaynak import akışı
+- 188 öğeli curated Türkçe yemek veritabanı ve opsiyonel dış kaynak import akışı
 - Aktivite, su, antrenman ve dinlenme günü takibi
 - Dashboard, haftalık özet ve disiplin skoru
 - Arkadaş takip sistemi ve gizlilik kontrolleri
 - Liderlik tablosu
 - Rozetler ve streak/gamification özeti
+- Açık/koyu tema tercihi
 
 Not: Challenge backend ve veritabanı yapısı korunur, ancak Challenge UI normal kullanıcı akışından gizlenmiştir. Arkadaş rekabeti Liderlik Tablosu üzerinden ilerler.
 
@@ -85,6 +86,8 @@ npm run prisma:generate
 npm run prisma:migrate
 npm run seed:foods
 ```
+
+`npm run seed:foods` komutu idempotent çalışır; aynı curated yemekleri tekrar çoğaltmaz.
 
 Check migration status:
 

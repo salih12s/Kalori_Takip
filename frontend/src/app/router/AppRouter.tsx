@@ -20,7 +20,7 @@ const SettingsPage = lazy(() => import("../../features/settings/pages/SettingsPa
 
 function RouteFallback() {
   return (
-    <div className="grid min-h-screen place-items-center bg-stone-50 px-4 text-sm font-medium text-stone-500">
+    <div className="grid min-h-screen place-items-center bg-stone-50 px-4 text-sm font-medium text-stone-500 dark:bg-stone-950 dark:text-stone-300">
       Yükleniyor...
     </div>
   );

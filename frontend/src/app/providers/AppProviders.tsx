@@ -4,6 +4,7 @@ import { AppToaster } from "../../components/feedback/AppToaster";
 import { AuthProvider } from "./AuthProvider";
 import { QueryProvider } from "./QueryProvider";
 import { RealtimeProvider } from "./RealtimeProvider";
+import { ThemeProvider } from "./ThemeProvider";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -15,11 +16,13 @@ interface AppProvidersProps {
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <QueryProvider>
-      <AuthProvider>
-        <RealtimeProvider>{children}</RealtimeProvider>
-        <AppToaster />
-      </AuthProvider>
-    </QueryProvider>
+    <ThemeProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <RealtimeProvider>{children}</RealtimeProvider>
+          <AppToaster />
+        </AuthProvider>
+      </QueryProvider>
+    </ThemeProvider>
   );
 }

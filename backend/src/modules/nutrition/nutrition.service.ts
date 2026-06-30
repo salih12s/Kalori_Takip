@@ -101,7 +101,7 @@ function getSearchScope(source: FoodSearchInput["source"]) {
 }
 
 function isTestLikeFoodName(name: string): boolean {
-  return /^(phase|dashboard)\b/i.test(name) || /\d{8,}/.test(name);
+  return /\b(phase|dashboard|test)\b/i.test(name) || /\d{8,}/.test(name);
 }
 
 function searchRank(food: LocalFood, normalizedQuery: string): number {
@@ -112,7 +112,8 @@ function searchRank(food: LocalFood, normalizedQuery: string): number {
   if (food.normalizedName.startsWith(normalizedQuery)) return 2;
   if (aliases.some((alias) => alias.startsWith(normalizedQuery))) return 3;
   if (food.normalizedName.includes(normalizedQuery)) return 4;
-  return 5;
+  if (aliases.some((alias) => alias.includes(normalizedQuery))) return 5;
+  return 6;
 }
 
 function sortLocalFoods(foods: LocalFood[], normalizedQuery: string): LocalFood[] {

@@ -15,7 +15,7 @@ export function AccountSettingsCard() {
   };
 
   return (
-    <section className="space-y-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+    <section className="space-y-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
       <div>
         <h2 className="text-base font-semibold text-stone-900">Hesap</h2>
         <p className="text-sm text-stone-500">Oturum bilgilerin ve çıkış.</p>

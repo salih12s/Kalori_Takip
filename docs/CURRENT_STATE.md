@@ -2,110 +2,118 @@
 
 ## Phase
 
-Post-MVP polish - Curated Food Database, Branding Polish, Mobile Auth Video and Challenge UI Removal is complete.
+Final UX Polish - Auth Splash Fix, Curated Food Only, Bigger Food Database, Dark Mode and Mobile Responsive Review is complete.
 
 ## Completed work
 
-- Added a curated internal Turkish/common food database with 95 foods.
-- Added idempotent curated food seed script: `npm run seed:foods`.
-- Seeded curated foods locally into PostgreSQL.
-- Changed normal food search to default to curated/local foods instead of Open Food Facts.
-- Kept Open Food Facts backend and external import flow available only when explicitly requested with `source=external`.
-- Updated nutrition search tabs to `Yemekler`, `Önbellek`, `Dış Kaynak`.
-- Kept manual food creation as a secondary fallback.
-- Preserved dynamic macro preview and backend FoodEntry snapshot calculations.
-- Added a rounded SVG favicon that behaves like a browser app icon.
-- Moved mobile intro video into public branding assets and selected desktop/mobile intro video by screen width.
-- Enlarged auth page branding with a readable Saydam Fitness logo.
-- Removed Challenge/Meydan Okuma from visible navigation.
-- Redirected `/challenges` to `/leaderboard` without deleting backend challenge code, schema or migrations.
-- Updated README and UI guide to reflect the active visible product surface.
+- Moved splash video out of the global app shell.
+- Splash video now renders only inside unauthenticated auth pages (`/login`, `/register`).
+- Authenticated dashboard/app pages no longer show the splash overlay.
+- Auth branding now uses a larger vertical Saydam Fitness logo above the brand name.
+- Nutrition add dialog now uses curated food search only.
+- Removed visible `Önbellek` and `Dış Kaynak` tabs from normal nutrition UI.
+- Removed visible external import/action copy from the normal food result UI.
+- Expanded curated food seed data from 95 to 188 foods.
+- Kept backend Open Food Facts/external import code available for explicit API use.
+- Improved default curated search filtering and ranking.
+- Added persisted light/dark/system theme support with `saydamfitness_theme`.
+- Added a header theme toggle and connected Settings theme selector to the real theme provider.
+- Added broad dark-mode coverage for app shell, navigation, shared cards, forms, loading and empty states.
+- Reviewed mobile layout hotspots and tightened header/mobile nav/auth/nutrition dialog behavior without changing desktop layout.
 
-## Branding changes
+## Splash/auth branding changes
 
-- Added `frontend/public/favicon.svg` with a rounded green app-icon style.
-- Updated `frontend/index.html` to use the SVG favicon.
-- `AppLogo` now supports `size="sm" | "md" | "lg"` and `showText`.
-- Auth layout uses the large logo variant.
+- `SplashVideo` is no longer rendered in `frontend/src/app/App.tsx`.
+- `SplashVideo` is rendered inside `AuthLayout` after auth loading/authenticated checks.
+- Already-authenticated users redirect before splash can render.
+- Mobile/desktop intro video selection remains:
+  - `<= 768px`: mobile intro
+  - desktop: desktop intro
+- Skip button `Geç`, muted autoplay, `playsInline`, fail-safe close and sessionStorage one-time behavior remain.
+- `AppLogo` now supports `size="xl"` and `orientation="vertical"`.
+- Auth pages use the large vertical logo layout.
 
-## Mobile video changes
+## Nutrition curated-only changes
 
-- Moved `saydamfitnesstelefon.mp4` to `frontend/public/branding/saydamfitness-intro-mobile.mp4`.
-- `SplashVideo` chooses the mobile intro when screen width is `<= 768px`.
-- Video remains muted, plays inline, autoplaying, skippable with `Geç`, and auto-dismisses after about 5 seconds.
-- Existing sessionStorage one-time behavior is preserved.
-- The mobile video is used in the global splash rather than as a login-only background to avoid making auth layout heavier.
+- `FoodSearchInput` always calls `useFoodSearch(query, "curated")`.
+- `FoodSourceTabs` was removed from normal UI.
+- Normal nutrition UI now shows only:
+  - search input `Yemek ara...`
+  - section title `Yemekler`
+  - food cards with `Seç ve Ekle`
+- Normal UI no longer shows:
+  - `Önbellek`
+  - `Dış Kaynak`
+  - `İçe Aktar ve Ekle`
+  - external API failure warning
+- Manual food fallback remains secondary through `Manuel ekle`.
 
-## Challenge UI removal
+## Curated database expansion
 
-- Removed Challenge from shared navigation items.
-- Updated mobile nav from 9 to 8 columns.
-- `/challenges` now redirects to `/leaderboard`.
-- Backend challenge module, database tables and migrations were intentionally preserved.
-- Hidden challenge feature files remain in the repo for future reuse but are not visible in normal navigation.
+- `backend/prisma/curated-foods.ts` now contains 188 curated foods.
+- Categories expanded across breakfast, proteins, carbs, vegetables, fruits, snacks, Turkish meals, dairy/drinks and fitness foods.
+- Seed remains idempotent with normalized global LOCAL food names.
+- Running seed twice produced:
+  - `curatedCount: 188`
+  - `duplicateNormalizedNames: 0`
+- No schema migration was needed.
 
-## Curated food database changes
+## Theme changes
 
-- Added `backend/prisma/curated-foods.ts`.
-- Added `backend/prisma/seed-foods.ts`.
-- Curated foods use:
-  - `source: LOCAL`
-  - `userId: null`
-  - `externalProvider: null`
-  - `externalId: null`
-  - `cachedAt: null`
-- Seed logic is idempotent by normalized global LOCAL food name and adds missing aliases with `skipDuplicates`.
-- No schema migration was required.
+- Added `frontend/src/app/providers/ThemeProvider.tsx`.
+- Added localStorage key: `saydamfitness_theme`.
+- Supported choices:
+  - `Açık`
+  - `Koyu`
+  - `Sistem varsayılanı`
+- Settings theme selector now updates the actual app theme.
+- Header includes an icon-only theme toggle.
+- Tailwind v4 class-based dark variant was enabled in `frontend/src/styles.css`.
 
-## Nutrition search UX changes
+## Mobile responsive changes
 
-- Backend `GET /api/foods/search` now defaults to `source=curated`.
-- `source=curated` searches clean global curated foods only.
-- `source=local` is reserved for imported/cached/user foods.
-- `source=external` still uses Open Food Facts explicitly.
-- Local results are sorted by:
-  - exact normalized name
-  - exact alias
-  - startsWith name
-  - startsWith alias
-  - contains
-- Test-looking food names are filtered from curated/default search.
-- Frontend default tab is now `Yemekler`.
-- External failure warning appears only on `Dış Kaynak`.
+- App shell now uses `overflow-x-hidden`.
+- Header mobile brand text hides on very narrow widths to avoid overflow.
+- Header actions use compact icon buttons on mobile.
+- Mobile nav remains 8 compact columns after Challenge removal.
+- Auth card remains centered and constrained on mobile.
+- Nutrition dialog already uses full width with max height and internal scroll; curated-only UI removes tab clutter.
 
 ## Changed files
 
 Backend:
 
-- `backend/package.json`
 - `backend/prisma/curated-foods.ts`
-- `backend/prisma/seed-foods.ts`
-- `backend/src/modules/nutrition/nutrition.repository.ts`
 - `backend/src/modules/nutrition/nutrition.service.ts`
-- `backend/src/modules/nutrition/nutrition.validation.ts`
 
 Frontend:
 
-- `frontend/index.html`
-- `frontend/public/favicon.svg`
-- `frontend/public/branding/saydamfitness-intro-mobile.mp4`
+- `frontend/src/app/App.tsx`
+- `frontend/src/app/providers/AppProviders.tsx`
+- `frontend/src/app/providers/ThemeProvider.tsx`
 - `frontend/src/app/router/AppRouter.tsx`
-- `frontend/src/app/router/routes.tsx`
 - `frontend/src/components/branding/AppLogo.tsx`
-- `frontend/src/components/branding/SplashVideo.tsx`
+- `frontend/src/components/layout/AppLayout.tsx`
+- `frontend/src/components/layout/Header.tsx`
 - `frontend/src/components/layout/MobileNav.tsx`
+- `frontend/src/components/layout/Sidebar.tsx`
+- `frontend/src/components/shared/EmptyState.tsx`
+- `frontend/src/components/shared/FormField.tsx`
+- `frontend/src/components/shared/LoadingState.tsx`
+- `frontend/src/components/shared/PageHeader.tsx`
+- `frontend/src/components/shared/StatCard.tsx`
 - `frontend/src/features/auth/components/AuthLayout.tsx`
-- `frontend/src/features/challenges/pages/ChallengesPage.tsx`
-- `frontend/src/features/gamification/utils/gamification-labels.ts`
 - `frontend/src/features/nutrition/components/FoodResultCard.tsx`
 - `frontend/src/features/nutrition/components/FoodSearchInput.tsx`
-- `frontend/src/features/nutrition/components/FoodSourceTabs.tsx`
-- `frontend/src/features/nutrition/types/nutrition.types.ts`
+- `frontend/src/features/nutrition/components/FoodSourceTabs.tsx` removed
+- `frontend/src/features/settings/components/AccountSettingsCard.tsx`
+- `frontend/src/features/settings/components/AppPreferencesCard.tsx`
+- `frontend/src/lib/ui.ts`
+- `frontend/src/styles.css`
 
 Docs:
 
 - `README.md`
-- `docs/UI_UX_GUIDE.md`
 - `docs/CURRENT_STATE.md`
 
 ## Commands run
@@ -115,62 +123,71 @@ cd backend && npm run prisma:generate
 cd backend && npx prisma migrate status
 cd backend && npm run build
 cd backend && npm run seed:foods
+cd backend && npm run seed:foods
 cd frontend && npm run build
 node dist/server.js
-node <curated nutrition smoke test script>
-cd frontend && npm run preview -- --host 127.0.0.1 --port 4201 --strictPort
+node <curated search and meal snapshot smoke test>
+cd frontend && npm run preview -- --host 127.0.0.1 --port 4202 --strictPort
 ```
 
 ## Backend check results
 
-- `npm run prisma:generate` passed after stopping a stale Node process that was locking Prisma's Windows query engine DLL.
-- `npx prisma migrate status` reported the database schema is up to date.
+- First `npm run prisma:generate` hit the known Windows Prisma DLL lock.
+- Stale Node process holding `query_engine-windows.dll.node` was stopped.
+- `npm run prisma:generate` passed after that.
+- `npx prisma migrate status` reported database schema is up to date.
 - `npm run build` passed.
-- `npm run seed:foods` seeded 95 curated foods.
+- `npm run seed:foods` passed twice and stayed idempotent.
 - `GET /api/health` returned success.
-- Auth register returned a valid token for the smoke user.
-- Default `GET /api/foods/search?q=yumurta` returned `Yumurta` first from `LOCAL`.
-- Default `GET /api/foods/search?q=siyah zeytin` returned `Siyah Zeytin` first from `LOCAL`.
-- Default `GET /api/foods/search?q=salatalik` returned `Salatalık` first from `LOCAL`.
-- Default `GET /api/foods/search?q=tavuk` returned `Tavuk Göğsü` first from `LOCAL`.
-- Default `GET /api/foods/search?q=yulaf` returned `Yulaf` first from `LOCAL`.
-- Default searches did not return mayonnaise, biscuit, queso, Phase or Dashboard junk results.
-- `POST /api/meals/entries` with 60g `Yumurta` created a snapshot of `93 kcal` and `7.8g protein`.
-- `DELETE /api/meals/entries/:entryId` removed the smoke entry.
-- Explicit `GET /api/foods/search?q=yumurta&source=external` still returned external results.
+- Authenticated default curated searches returned clean LOCAL results:
+  - `yumurta`: `Yumurta | Yumurta Beyazı | Haşlanmış Yumurta`
+  - `siyah zeytin`: `Siyah Zeytin`
+  - `salatalik`: `Salatalık`
+  - `tavuk`: `Tavuk Göğsü | Tavuk But | Tavuk Döner`
+  - `yulaf`: `Yulaf | Yulaf Ezmesi | Yulaflı Pankek`
+  - `domates`: `Domates | Domates Çorbası`
+  - `balik`: `Balık | Ton Balıklı Salata | Ton Balıklı Sandviç`
+  - `mercimek corbasi`: `Mercimek Çorbası`
+- Default searches did not return mayonnaise, biscuit, queso, Phase, Dashboard, Test or timestamp-like junk.
+- Adding 60g `Yumurta` produced `93 kcal` and `7.8g protein`.
+- Smoke entry deletion passed.
 
 ## Frontend check results
 
 - `npm run build` passed.
-- Vite preview on port `4201` served HTTP 200 for:
+- Vite preview on port `4202` served HTTP 200 for:
   - `/login`
   - `/register`
+  - `/dashboard`
   - `/nutrition`
   - `/leaderboard`
-  - `/dashboard`
+  - `/settings`
+  - `/badges`
   - `/challenges`
-- Source check confirmed `Meydan Okuma` no longer appears in visible app/navigation sources.
-- Nutrition source tabs now show `Yemekler`, `Önbellek`, `Dış Kaynak`.
-- Favicon asset exists at `frontend/public/favicon.svg`.
-- Mobile intro asset exists at `frontend/public/branding/saydamfitness-intro-mobile.mp4`.
+- Source checks confirmed:
+  - `SplashVideo` appears only in `AuthLayout`, not globally in `App.tsx`.
+  - `routePaths.challenges` redirects to `routePaths.leaderboard`.
+  - Nutrition UI no longer contains `Önbellek`, `Dış Kaynak`, `İçe Aktar` or `FoodSourceTabs`.
+  - Theme storage key `saydamfitness_theme` exists in `ThemeProvider`.
+- Vite still reports the existing large chunk warning.
 
 ## Known issues
 
-- Full browser automation is not installed; frontend verification used TypeScript build, Vite preview route smoke and source checks.
-- Vite still reports the existing large chunk warning for the main bundle.
+- Full browser automation is not installed; mobile responsiveness and theme behavior were verified by build, preview route smoke and source checks rather than Playwright screenshots.
 - Smoke tests created local development database rows.
-- Hidden challenge feature files still contain challenge implementation code, but the route redirects and the nav item is removed.
+- Nutrition values are approximate standard reference values for tracking, not medical advice.
+- Backend external food code remains available by design but is hidden from normal UI.
 
 ## Current project status
 
-The normal nutrition flow now uses a clean curated internal food database, branding is more app-like, mobile intro video is supported, and Challenge UI is hidden in favor of Leaderboard-based competition.
+The app now has auth-only splash behavior, a larger curated-only normal nutrition flow, persisted light/dark theme support and improved mobile/shared layout resilience.
 
 ## Git commits
 
 Next commit:
 
-- `feat: add curated foods and polish branding navigation`
+- `feat: refine auth nutrition theme responsive ux`
 
 ## Next recommended step
 
-Review the nutrition search and auth splash behavior in a browser, then continue with the next product polish task.
+Open the app in desktop and mobile viewport once to visually confirm the auth splash, dark mode and nutrition add dialog feel right before deployment polish.

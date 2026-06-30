@@ -2,6 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 
 import { routePaths } from "../../../app/router/routes";
 import { AppLogo } from "../../../components/branding/AppLogo";
+import { SplashVideo } from "../../../components/branding/SplashVideo";
 import { FullScreenLoader } from "../../../components/shared/FullScreenLoader";
 import { useOnboardingStatus } from "../../onboarding/hooks/useOnboarding";
 import { useAuth } from "../hooks/useAuth";
@@ -31,12 +32,13 @@ export function AuthLayout() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-stone-50 px-4 py-10">
+    <div className="grid min-h-screen place-items-center bg-stone-50 px-4 py-8 dark:bg-stone-950">
+      <SplashVideo />
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center">
-          <AppLogo size="lg" showText />
+          <AppLogo size="xl" showText orientation="vertical" />
         </div>
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-8">
           <Outlet />
         </div>
         <p className="mt-6 text-center text-xs text-stone-400">Saydam Fitness · Sağlıklı rekabet</p>

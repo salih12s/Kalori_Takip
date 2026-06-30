@@ -5,20 +5,16 @@ import { getFoodEmoji } from "../utils/food-emoji";
 
 interface FoodResultCardProps {
   food: FoodSearchResult;
-  isImporting: boolean;
   onSelect: (food: FoodSearchResult) => void;
-  onImport: (food: FoodSearchResult) => void;
 }
 
 const sourceLabels: Record<FoodResultSource, string> = {
   LOCAL: "Yemekler",
-  CACHED: "Önbellek",
-  EXTERNAL: "Dış Kaynak",
+  CACHED: "Yemekler",
+  EXTERNAL: "Yemekler",
 };
 
-export function FoodResultCard({ food, isImporting, onSelect, onImport }: FoodResultCardProps) {
-  const actionLabel = food.canImport ? "İçe Aktar ve Ekle" : "Seç ve Ekle";
-
+export function FoodResultCard({ food, onSelect }: FoodResultCardProps) {
   return (
     <motion.div
       layout
@@ -49,11 +45,10 @@ export function FoodResultCard({ food, isImporting, onSelect, onImport }: FoodRe
 
       <button
         type="button"
-        disabled={isImporting}
-        onClick={() => (food.canImport ? onImport(food) : onSelect(food))}
+        onClick={() => onSelect(food)}
         className="mt-3 w-full rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-60"
       >
-        {isImporting && food.canImport ? "Aktarılıyor..." : actionLabel}
+        Seç ve Ekle
       </button>
     </motion.div>
   );

@@ -14,7 +14,7 @@ export function LoadingState({ label = "Yükleniyor...", rows = 3 }: LoadingStat
       {Array.from({ length: rows }).map((_, index) => (
         <div
           key={index}
-          className="h-16 w-full animate-pulse rounded-xl border border-stone-200 bg-stone-100"
+          className="h-16 w-full animate-pulse rounded-xl border border-stone-200 bg-stone-100 dark:border-stone-800 dark:bg-stone-800"
         />
       ))}
     </div>

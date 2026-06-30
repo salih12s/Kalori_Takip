@@ -32,19 +32,19 @@ export function StatCard({
     <motion.div
       whileHover={{ y: -2 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
+      className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900"
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-medium text-stone-500">{title}</p>
+        <p className="text-sm font-medium text-stone-500 dark:text-stone-300">{title}</p>
         {Icon ? (
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-50 text-emerald-600">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300">
             <Icon size={18} />
           </span>
         ) : null}
       </div>
 
       <div className="mt-3 flex items-baseline gap-1">
-        <span className="text-2xl font-bold text-stone-900">{value}</span>
+        <span className="text-2xl font-bold text-stone-900 dark:text-stone-50">{value}</span>
         {suffix ? <span className="text-sm text-stone-400">{suffix}</span> : null}
       </div>
 
@@ -53,7 +53,7 @@ export function StatCard({
       ) : null}
 
       {clampedProgress !== null ? (
-        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-stone-100">
+        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
           <div
             className={cn("h-full rounded-full bg-emerald-500 transition-all")}
             style={{ width: `${clampedProgress}%` }}

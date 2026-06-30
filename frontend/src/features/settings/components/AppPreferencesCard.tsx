@@ -1,10 +1,10 @@
 import { useState } from "react";
 
+import { useTheme, type ThemeMode } from "../../../app/providers/ThemeProvider";
 import { FormField } from "../../../components/shared/FormField";
 import { inputClassName } from "../../../lib/ui";
 
 /** Local-only UI preferences. Persisted to localStorage; no backend involved. */
-const THEME_KEY = "fitboard_pref_theme";
 const UNIT_KEY = "fitboard_pref_unit";
 
 function readPref(key: string, fallback: string): string {
@@ -27,7 +27,7 @@ const themeOptions = [
   { value: "system", label: "Sistem varsayılanı" },
   { value: "light", label: "Açık" },
   { value: "dark", label: "Koyu" },
-];
+] satisfies Array<{ value: ThemeMode; label: string }>;
 
 const unitOptions = [
   { value: "metric", label: "Metrik sistem" },
@@ -35,11 +35,11 @@ const unitOptions = [
 ];
 
 export function AppPreferencesCard() {
-  const [theme, setTheme] = useState(() => readPref(THEME_KEY, "system"));
+  const { theme, setTheme } = useTheme();
   const [unit, setUnit] = useState(() => readPref(UNIT_KEY, "metric"));
 
   return (
-    <section className="space-y-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+    <section className="space-y-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
       <div>
         <h2 className="text-base font-semibold text-stone-900">Uygulama Tercihleri</h2>
         <p className="text-sm text-stone-500">Tercihlerin yalnızca bu cihazda saklanır.</p>
@@ -52,8 +52,7 @@ export function AppPreferencesCard() {
             className={inputClassName}
             value={theme}
             onChange={(event) => {
-              setTheme(event.target.value);
-              writePref(THEME_KEY, event.target.value);
+              setTheme(event.target.value as ThemeMode);
             }}
           >
             {themeOptions.map((option) => (

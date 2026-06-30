@@ -10,7 +10,7 @@ import { Sidebar } from "./Sidebar";
  */
 export function AppLayout() {
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-950">
+    <div className="min-h-screen overflow-x-hidden bg-stone-50 text-stone-950 dark:bg-stone-950 dark:text-stone-50">
       <Sidebar />
 
       <div className="lg:pl-64">
