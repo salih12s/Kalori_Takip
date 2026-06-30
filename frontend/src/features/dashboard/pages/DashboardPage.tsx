@@ -1,14 +1,44 @@
-import { Activity, Flame, Footprints, Trophy } from "lucide-react";
-
 import { PageShell } from "../../../components/layout/PageShell";
-import { EmptyState } from "../../../components/shared/EmptyState";
+import { ErrorState } from "../../../components/shared/ErrorState";
 import { PageHeader } from "../../../components/shared/PageHeader";
-import { StatCard } from "../../../components/shared/StatCard";
+import { DashboardSkeleton } from "../components/DashboardSkeleton";
+import { MealsPreviewCard } from "../components/MealsPreviewCard";
+import { TodaySummaryGrid } from "../components/TodaySummaryGrid";
+import { WeeklySummarySection } from "../components/WeeklySummarySection";
+import { useTodayDashboard } from "../hooks/useTodayDashboard";
+import { useWeeklyDashboard } from "../hooks/useWeeklyDashboard";
 
-/**
- * Placeholder dashboard. Cards show neutral values only — no backend data yet.
- */
 export function DashboardPage() {
+  const todayQuery = useTodayDashboard();
+  const weeklyQuery = useWeeklyDashboard();
+
+  if (todayQuery.isLoading || weeklyQuery.isLoading) {
+    return (
+      <PageShell>
+        <DashboardSkeleton />
+      </PageShell>
+    );
+  }
+
+  if (todayQuery.isError || weeklyQuery.isError || !todayQuery.data || !weeklyQuery.data) {
+    return (
+      <PageShell>
+        <PageHeader
+          title="Dashboard"
+          description="Bugünkü kalori, aktivite ve hedef durumunu buradan takip et."
+        />
+        <ErrorState
+          title="Dashboard verileri alınamadı."
+          description="Lütfen tekrar dene."
+          onRetry={() => {
+            void todayQuery.refetch();
+            void weeklyQuery.refetch();
+          }}
+        />
+      </PageShell>
+    );
+  }
+
   return (
     <PageShell>
       <PageHeader
@@ -16,17 +46,12 @@ export function DashboardPage() {
         description="Bugünkü kalori, aktivite ve hedef durumunu buradan takip et."
       />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Bugünkü Kalori" value="—" suffix="kcal" icon={Flame} />
-        <StatCard title="Kalan Kalori" value="—" suffix="kcal" icon={Activity} />
-        <StatCard title="Adım" value="—" icon={Footprints} />
-        <StatCard title="Haftalık Sıralama" value="—" icon={Trophy} />
-      </div>
+      <TodaySummaryGrid dashboard={todayQuery.data} />
 
-      <EmptyState
-        title="Veriler henüz bağlı değil"
-        description="Dashboard gerçek verilerle ileriki bir adımda doldurulacak. Şimdilik temel düzen hazır."
-      />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
+        <WeeklySummarySection weekly={weeklyQuery.data} />
+        <MealsPreviewCard meals={todayQuery.data.mealsPreview} />
+      </div>
     </PageShell>
   );
 }
