@@ -2,147 +2,143 @@
 
 ## Phase
 
-Phase 17 - External Food API + Cache is implemented.
+Phase 18 - Final Polish + Responsive + Deploy Prep + GitHub Repository Setup is complete.
 
 ## Completed work
 
-- Extended existing nutrition search with optional source filtering:
-  - `GET /api/foods/search?q=...`
-  - `GET /api/foods/search?q=...&source=local`
-  - `GET /api/foods/search?q=...&source=external`
-  - `GET /api/foods/search?q=...&source=all`
-- Kept the safest backward-compatible default: missing `source` uses `local`.
-- Added Open Food Facts external search through a small provider layer.
-- Added explicit external food import/cache endpoint:
-  - `POST /api/foods/import-external`
-- Imported external foods are stored in the existing `Food` table and can be used by the existing meal entry endpoint.
-- Duplicate imports are prevented by provider + external id cache lookup and database uniqueness.
-- Existing local food creation, local search, meal entry creation, meal deletion and daily total recalculation still work.
-- Updated nutrition UI search to support:
-  - `Tümü`
-  - `Yerel`
-  - `Dış Kaynak`
-  - `Önbellekte`
-  - `İçe Aktar`
-  - `Eklenebilir`
-- External results must be imported explicitly before adding to a meal.
-- No barcode scanner, AI image recognition, paid API, Health Connect, HealthKit or Strava work was added.
+- Ran final Git safety checks.
+- Added GitHub remote:
+  - `origin https://github.com/salih12s/Kalori_Takip.git`
+- Audited ignored files and tracked files for env/build/secret artifacts.
+- Confirmed `.env`, `.env.*`, `node_modules`, `dist`, `build`, logs, coverage and secret/key patterns are ignored.
+- Confirmed no real `.env`, `node_modules`, `dist`, `build`, secret or key files are tracked.
+- Added route-level frontend code splitting with `React.lazy` and `Suspense`.
+- Kept route guards and protected app layout behavior unchanged.
+- Updated root `README.md` for current project setup, stack, features, env variables, build commands, Prisma commands and deploy/security notes.
+- Ran final backend checks.
+- Ran final frontend build and route smoke checks.
+- No backend business logic or Prisma schema changes were made in this phase.
+- No new product features were added.
 
-## Schema changes
+## Polish changes
 
-Additive Prisma migration:
+- `frontend/src/app/router/AppRouter.tsx`
+  - Converted route page imports to lazy imports.
+  - Added a small Turkish loading fallback: `Yükleniyor...`
+  - Preserved auth layout, onboarding guard, protected layout and app routes.
+- `README.md`
+  - Replaced stale Phase 0 content with current FitBoard / KaloriTakip setup and deploy guidance.
 
-- `backend/prisma/migrations/20260630123000_add_external_food_cache/migration.sql`
+## Responsive review
 
-Food model additions:
+Reviewed final structure for:
 
-- `externalProvider String?`
-- `cachedAt DateTime?`
-- `@@index([externalProvider, externalId])`
-- `@@unique([externalProvider, externalId])`
+- Protected app layout only on authenticated app routes.
+- Auth pages outside `AppLayout`.
+- Desktop-only sidebar.
+- Mobile bottom navigation.
+- Table mobile behavior through existing horizontal overflow wrappers.
+- Dialog/mobile width patterns.
+- Shared loading/error/empty state usage.
 
-Existing `Food.source` and `Food.externalId` fields were preserved. Existing local foods are not modified.
+No broad redesign was needed. The only code polish applied was route-level code splitting, which also improved the bundle warning.
 
-## Changed files
+## Env/security audit
+
+Commands used:
+
+```bash
+git status --ignored --short
+git ls-files | Select-String -Pattern '(\\.env|node_modules|dist|build|secret|key)'
+git diff --check
+```
+
+Results:
+
+- Ignored local files include `backend/.env`, `frontend/.env`, `node_modules`, `dist` and logs.
+- Tracked matches are only safe example files:
+  - `backend/.env.example`
+  - `frontend/.env.example`
+- No actual secret values were printed or committed.
+
+## Build and smoke test results
 
 Backend:
 
-- `backend/prisma/schema.prisma`
-- `backend/prisma/migrations/20260630123000_add_external_food_cache/migration.sql`
-- `backend/src/modules/nutrition/nutrition.routes.ts`
-- `backend/src/modules/nutrition/nutrition.controller.ts`
-- `backend/src/modules/nutrition/nutrition.service.ts`
-- `backend/src/modules/nutrition/nutrition.repository.ts`
-- `backend/src/modules/nutrition/nutrition.validation.ts`
-- `backend/src/modules/nutrition/nutrition.types.ts`
-- `backend/src/modules/nutrition/nutrition.mapper.ts`
-- `backend/src/modules/nutrition/external/`
+- `npm run prisma:generate` passed.
+- `npx prisma migrate status` passed and reports database schema is up to date.
+- `npm run build` passed.
+- `GET /api/health` returned success.
 
 Frontend:
 
-- `frontend/src/features/nutrition/api/nutrition.api.ts`
-- `frontend/src/features/nutrition/hooks/useFoodSearch.ts`
-- `frontend/src/features/nutrition/hooks/useImportExternalFood.ts`
-- `frontend/src/features/nutrition/components/FoodSearchInput.tsx`
-- `frontend/src/features/nutrition/components/AddFoodEntryDialog.tsx`
-- `frontend/src/features/nutrition/types/nutrition.types.ts`
+- `npm run build` passed.
+- Route-level code splitting removed the previous Vite `>500 kB` chunk warning.
+- `npm run preview -- --host 127.0.0.1 --port 4198 --strictPort` started successfully.
+- Preview route smoke returned HTTP 200 for:
+  - `/login`
+  - `/register`
+  - `/dashboard`
+  - `/nutrition`
+  - `/activity`
+  - `/friends`
+  - `/leaderboard`
+  - `/profile`
+  - `/settings`
+  - `/challenges`
+  - `/badges`
 
-Docs:
+## Changed files
 
+- `README.md`
+- `frontend/src/app/router/AppRouter.tsx`
 - `docs/CURRENT_STATE.md`
 
 ## Commands run
 
 ```bash
-npx prisma format
-npm run prisma:migrate -- --name add_external_food_cache
-npx prisma migrate deploy
+git status
+git log --oneline --decorate -10
+git remote -v
+git status --ignored --short
+git ls-files | Select-String -Pattern '(\\.env|node_modules|dist|build|secret|key)'
+git remote add origin https://github.com/salih12s/Kalori_Takip.git
 npm run prisma:generate
-npm run build
-npm run build
 npx prisma migrate status
-npm run preview -- --host 127.0.0.1 --port 4197 --strictPort
+npm run build
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4198 --strictPort
 git diff --check
 ```
 
-Notes:
+## GitHub remote status
 
-- `npm run prisma:migrate -- --name add_external_food_cache` stopped because Prisma Migrate refuses a non-interactive unique-constraint warning in this environment.
-- The migration SQL was added manually and applied successfully with `npx prisma migrate deploy`.
-- `npx prisma migrate status` reports the database schema is up to date.
-
-## Backend external food check results
-
-Live backend smoke test passed:
-
-- `GET /api/health` returned success.
-- Unauthenticated food search returned 401.
-- Unauthenticated external import returned 401.
-- Local food creation still works.
-- Default local food search still returns local results.
-- `source=all` search returned local + external-compatible response shape.
-- `source=external` searched Open Food Facts successfully and returned 9 mapped results during the smoke test.
-- `POST /api/foods/import-external` created a cached `Food`.
-- Importing the same provider + external id twice returned the same cached food id.
-- Imported food was added through `POST /api/meals/entries`.
-- Daily totals updated after add.
-- `DELETE /api/meals/entries/:entryId` still recalculated totals back to 0.
-
-## Frontend nutrition check results
-
-- `npm run build` passed with no TypeScript errors.
-- Preview route smoke returned HTTP 200 for `/nutrition` and `/`.
-- Nutrition search source filter appears in the UI source:
-  - `Tümü`
-  - `Yerel`
-  - `Dış Kaynak`
-  - `Önbellekte`
-  - `İçe Aktar`
-- Local/cached results can be selected directly.
-- External results show an import button and are selected after successful import.
-- User-facing text added in this phase is Turkish.
-
-## Known issues
-
-- Vite still reports the existing large chunk warning after production build. Build succeeds.
-- Full browser automation is not installed; frontend verification used TypeScript build, Vite preview route smoke and source checks.
-- External food search depends on Open Food Facts availability. If it fails, the backend returns local results and `externalSearchFailed: true` rather than failing the whole search.
-- Smoke tests added local development database rows.
+- `origin` is configured as:
+  - `https://github.com/salih12s/Kalori_Takip.git`
 
 ## Current phase status
 
-Phase 17 is complete and ready to commit.
+Phase 18 is complete and ready to commit and push.
 
 ## Git commits
 
 Latest committed work before this phase:
 
-- `1df1c87 feat: add badges and streak gamification`
+- `83fe47a feat: add external food search cache`
 
 Next commit:
 
-- `feat: add external food search cache`
+- `chore: final polish and deploy prep`
 
-## Next recommended step
+## Known issues
 
-Commit Phase 17, then only start the next explicitly requested phase.
+- Full browser automation is not installed; frontend verification used production build and Vite preview route smoke.
+- Local ignored files remain on disk (`.env`, `node_modules`, `dist`, logs), as expected.
+
+## Final project status
+
+The project is ready for GitHub push and deployment preparation. Backend and frontend builds pass, migrations are up to date, route smoke checks pass, secrets are ignored, and README setup guidance is current.
+
+## Next recommended deployment step
+
+Push the `master` branch to GitHub, then configure deployment hosting with production environment variables.
