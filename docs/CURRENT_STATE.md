@@ -2,6 +2,39 @@
 
 ## Phase
 
+Mobile splash video hardening and production cache/stale-app handling is complete,
+on top of the prior Production/Local Env Scripts, Railway Deploy Hardening, Railway
+Root Start Fallback and Dashboard Card Layout Fix work.
+
+## Mobile splash + production cache work (latest)
+
+- Re-encoded the mobile intro to H.264 Main / yuv420p with `+faststart` and a new
+  versioned filename `saydamfitness-intro-mobile-v2.mp4` (cache-busts the old
+  immutable-cached file). Removed the old `saydamfitness-intro-mobile.mp4`.
+- Hardened `SplashVideo`:
+  - shown only on auth pages via `AuthLayout` (never on protected pages),
+  - best-effort `play()` with rejection handling,
+  - start-timeout fail-safe (~2s) and hard cap (~4s) so it never blocks,
+  - `muted` + `playsInline` + `autoPlay` + `preload="auto"` + logo `poster`,
+  - "Hazırlanıyor..." fallback state and working "Geç" button,
+  - `key={videoSource}` to force reload on source change.
+- Added a startup cache guard (`frontend/src/utils/cache-reset.ts` +
+  `frontend/src/lib/app-version.ts`):
+  - always unregisters stale service workers,
+  - on app-version change clears Cache Storage and the intro session flag,
+  - preserves the JWT auth token and theme preference.
+  - Wired into `frontend/src/main.tsx` before render.
+- Added `VITE_APP_VERSION` support (env example, vite-env types, env switch bats).
+- Hardened `frontend/src/lib/env.ts`: production warns instead of silently using
+  localhost for `VITE_API_URL`, and derives `VITE_SOCKET_URL` from the API URL
+  when unset in production. Dev keeps localhost fallbacks.
+- Added cache-control meta tags to `frontend/index.html`.
+- Added a Production Troubleshooting section to `README.md`.
+- Added `frontend/public/.htaccess` SPA fallback + scoped cache policy
+  (immutable only for hashed assets; revalidating for stable-named media).
+
+## Earlier phase
+
 Production/Local Env Scripts, Railway Deploy Hardening, Railway Root Start Fallback and Dashboard Card Layout Fix is complete.
 
 ## Completed work

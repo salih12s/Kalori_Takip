@@ -222,6 +222,75 @@ Password: PGPASSWORD
 
 Do not use `localhost` for Railway DB. Do not use `postgres.railway.internal` from DBeaver; that host is for Railway internal services. If DBeaver has `Database=postgres` while Railway `PGDATABASE=railway`, change it to `railway`.
 
+## Production Troubleshooting (salihsydm.com)
+
+### Site opens in incognito but not in a normal browser (or loads very slowly)
+
+This is almost always a stale client cache from an older deployment. The app now
+ships a startup cache guard (`frontend/src/utils/cache-reset.ts`) that unregisters
+leftover service workers and clears Cache Storage on a version change, but a user
+already stuck can recover manually:
+
+1. Hard refresh: `Ctrl+F5` (Windows) / `Cmd+Shift+R` (macOS).
+2. DevTools → Application → Service Workers → **Unregister** any worker.
+3. DevTools → Application → Storage → **Clear site data**.
+4. Then reload normally.
+
+After each deploy, also bump the app version so returning visitors auto-flush
+their cache:
+
+- Set `VITE_APP_VERSION` to a unique build id (git SHA / timestamp) at build time, or
+- bump `FALLBACK_APP_VERSION` in `frontend/src/lib/app-version.ts`.
+
+### If using Cloudflare in front of the frontend
+
+- Purge cache after every deploy (Caching → Configuration → Purge Everything).
+- Temporarily disable **Bot Fight Mode** / **Under Attack Mode** for the app domain.
+- Keep Security Level at Medium or lower; aggressive challenges can block the SPA.
+- Point `salihsydm.com` at the **frontend** hosting, not the backend.
+- The backend must live on a separate domain/subdomain (e.g. `api.salihsydm.com`
+  or the Railway domain `kaloritakip-production.up.railway.app`).
+
+### SPA hosting (Apache / LiteSpeed)
+
+`frontend/public/.htaccess` is copied into the build and provides:
+
+- a rewrite of all non-file routes to `index.html` (so `/login`, `/dashboard`,
+  refreshes and deep links work),
+- `immutable` long cache only for fingerprinted `/assets/*.js|.css`,
+- a short revalidating cache for stable-named media (logo, favicon, splash videos),
+- `no-cache` for `index.html`.
+
+When uploading a new build, make sure `.htaccess` (a dotfile, may be hidden) and
+the `branding/` folder are actually overwritten on the server.
+
+### Frontend env (production build)
+
+```env
+VITE_API_URL="https://YOUR_BACKEND_DOMAIN/api"
+VITE_SOCKET_URL="https://YOUR_BACKEND_DOMAIN"
+VITE_APP_VERSION="production-build-id"
+```
+
+If `VITE_API_URL` is missing in a production build the app logs a console warning
+and falls back to localhost; if `VITE_SOCKET_URL` is missing it is derived from
+`VITE_API_URL`. Always set both explicitly for production.
+
+### Backend env (production)
+
+```env
+FRONTEND_URL="https://salihsydm.com"
+CLIENT_URL="https://salihsydm.com"
+```
+
+### Quick health checks
+
+- Frontend: open `https://salihsydm.com` (and `/login`, `/register`, `/dashboard`).
+- Backend: `GET https://YOUR_BACKEND_DOMAIN/api/health` should return
+  `{ "success": true, "message": "FitBoard API is running" }`.
+- Browser DevTools: check the Console for red errors and the Network tab for
+  failed (red) requests; confirm requests go to the backend domain, not localhost.
+
 ## Security
 
 - Never commit `.env`, database dumps, API keys, JWT secrets or private keys.

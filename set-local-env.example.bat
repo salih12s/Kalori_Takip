@@ -16,6 +16,7 @@ rem Copy to set-local-env.bat and replace placeholders. Never commit the real fi
 (
   echo VITE_API_URL="http://localhost:5000/api"
   echo VITE_SOCKET_URL="http://localhost:5000"
+  echo VITE_APP_VERSION="local-dev"
 ) > frontend\.env
 
 echo Local env files were written with placeholder-safe values.

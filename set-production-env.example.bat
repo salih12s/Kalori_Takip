@@ -17,6 +17,7 @@ rem Railway backend should normally use Railway variables directly instead of th
 (
   echo VITE_API_URL="https://YOUR_BACKEND_DOMAIN/api"
   echo VITE_SOCKET_URL="https://YOUR_BACKEND_DOMAIN"
+  echo VITE_APP_VERSION="production-build-id"
 ) > frontend\.env
 
 echo Production-like env files were written with placeholder-safe values.
