@@ -39,12 +39,17 @@ export function WeeklySummarySection({ weekly }: WeeklySummarySectionProps) {
         </div>
         <div className="grid gap-2">
           {weekly.days.map((day) => (
-            <div key={day.date} className="grid grid-cols-2 gap-3 rounded-lg bg-stone-50 px-3 py-2 text-sm md:grid-cols-5">
-              <span className="font-medium text-stone-700">{dayFormatter.format(new Date(`${day.date}T00:00:00`))}</span>
+            <div
+              key={day.date}
+              className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-stone-50 px-3 py-2.5 text-sm"
+            >
+              <span className="min-w-18 font-medium text-stone-700">
+                {dayFormatter.format(new Date(`${day.date}T00:00:00`))}
+              </span>
               <span className="text-stone-500">{day.totalCalories} kcal</span>
               <span className="text-stone-500">{day.totalSteps} adım</span>
               <span className="text-stone-500">{day.isWorkoutDay ? "Spor Günü" : day.isOffDay ? "Dinlenme" : "Normal"}</span>
-              <span className="text-right font-medium text-stone-800 md:text-left">{day.dailyScore} puan</span>
+              <span className="font-medium text-stone-800 sm:ml-auto">{day.dailyScore} puan</span>
             </div>
           ))}
         </div>

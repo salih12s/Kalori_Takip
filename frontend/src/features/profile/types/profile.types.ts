@@ -2,6 +2,7 @@ export type {
   Gender,
   PrivacyLevel,
   GoalType,
+  ActivityLevel,
   ProfileResponse,
   GoalResponse,
   UpdateProfilePayload,

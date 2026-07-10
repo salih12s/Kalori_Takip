@@ -6,20 +6,25 @@ import { toast } from "sonner";
 import { FormField } from "../../../components/shared/FormField";
 import { getApiErrorMessage } from "../../../lib/api";
 import { inputClassName, primaryButtonClassName } from "../../../lib/ui";
+import { activityLevelOptions } from "../../profile/utils/profile-labels";
 import { useOnboarding } from "../hooks/useOnboarding";
 import { profileStepSchema, type ProfileStepValues } from "../schemas/onboarding.schema";
-import type { Gender, PrivacyLevel, ProfileResponse, UpdateProfilePayload } from "../types/onboarding.types";
+import type {
+  ActivityLevel,
+  Gender,
+  PrivacyLevel,
+  ProfileResponse,
+  UpdateProfilePayload,
+} from "../types/onboarding.types";
 
 interface ProfileStepFormProps {
   profile: ProfileResponse | null;
-  onComplete: () => void;
+  onComplete: (profile: ProfileResponse) => void;
 }
 
 const genderOptions: Array<{ value: Gender; label: string }> = [
   { value: "MALE", label: "Erkek" },
   { value: "FEMALE", label: "Kadın" },
-  { value: "OTHER", label: "Diğer" },
-  { value: "PREFER_NOT_TO_SAY", label: "Belirtmek istemiyorum" },
 ];
 
 const privacyOptions: Array<{ value: PrivacyLevel; label: string }> = [
@@ -31,11 +36,11 @@ const privacyOptions: Array<{ value: PrivacyLevel; label: string }> = [
 function buildPayload(values: ProfileStepValues): UpdateProfilePayload {
   return {
     fullName: values.fullName.trim(),
-    bio: values.bio?.trim() || undefined,
     gender: values.gender as Gender,
     birthDate: values.birthDate,
     heightCm: Number(values.heightCm),
     currentWeightKg: Number(values.currentWeightKg),
+    activityLevel: values.activityLevel as ActivityLevel,
     privacyLevel: values.privacyLevel as PrivacyLevel,
   };
 }
@@ -51,11 +56,11 @@ export function ProfileStepForm({ profile, onComplete }: ProfileStepFormProps) {
     resolver: zodResolver(profileStepSchema),
     defaultValues: {
       fullName: "",
-      bio: "",
-      gender: "PREFER_NOT_TO_SAY",
+      gender: "",
       birthDate: "",
       heightCm: "",
       currentWeightKg: "",
+      activityLevel: "",
       privacyLevel: "FRIENDS",
     },
   });
@@ -64,20 +69,21 @@ export function ProfileStepForm({ profile, onComplete }: ProfileStepFormProps) {
     if (!profile) return;
     reset({
       fullName: profile.fullName ?? "",
-      bio: profile.bio ?? "",
-      gender: profile.gender ?? "PREFER_NOT_TO_SAY",
+      gender: profile.gender ?? "",
       birthDate: profile.birthDate?.slice(0, 10) ?? "",
       heightCm: profile.heightCm ? String(profile.heightCm) : "",
       currentWeightKg: profile.currentWeightKg ? String(profile.currentWeightKg) : "",
+      activityLevel: profile.activityLevel ?? "",
       privacyLevel: profile.privacyLevel,
     });
   }, [profile, reset]);
 
   const onSubmit = (values: ProfileStepValues) => {
-    profileMutation.mutate(buildPayload(values), {
-      onSuccess: () => {
+    const payload = buildPayload(values);
+    profileMutation.mutate(payload, {
+      onSuccess: (savedProfile) => {
         toast.success("Profil bilgilerin kaydedildi");
-        onComplete();
+        onComplete(savedProfile);
       },
       onError: (error) => toast.error(getApiErrorMessage(error)),
     });
@@ -89,13 +95,10 @@ export function ProfileStepForm({ profile, onComplete }: ProfileStepFormProps) {
         <input id="fullName" className={inputClassName} {...register("fullName")} />
       </FormField>
 
-      <FormField label="Kısa açıklama" htmlFor="bio" error={errors.bio?.message}>
-        <textarea id="bio" rows={3} className={inputClassName} {...register("bio")} />
-      </FormField>
-
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField label="Cinsiyet" htmlFor="gender" error={errors.gender?.message}>
           <select id="gender" className={inputClassName} {...register("gender")}>
+            <option value="">Seçiniz</option>
             {genderOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -118,6 +121,17 @@ export function ProfileStepForm({ profile, onComplete }: ProfileStepFormProps) {
           <input id="currentWeightKg" inputMode="decimal" className={inputClassName} {...register("currentWeightKg")} />
         </FormField>
       </div>
+
+      <FormField label="Aktivite seviyesi" htmlFor="activityLevel" error={errors.activityLevel?.message}>
+        <select id="activityLevel" className={inputClassName} {...register("activityLevel")}>
+          <option value="">Seçiniz</option>
+          {activityLevelOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </FormField>
 
       <FormField label="Gizlilik" htmlFor="privacyLevel" error={errors.privacyLevel?.message}>
         <select id="privacyLevel" className={inputClassName} {...register("privacyLevel")}>

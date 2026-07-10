@@ -6,7 +6,7 @@ import { env } from "../../config/env.js";
 
 export type AuthTokenPayload = {
   userId: string;
-  email: string;
+  email: string | null;
   username: string;
   role: UserRole;
 };

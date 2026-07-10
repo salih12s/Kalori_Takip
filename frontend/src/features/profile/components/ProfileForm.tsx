@@ -7,8 +7,8 @@ import { getApiErrorMessage } from "../../../lib/api";
 import { inputClassName, primaryButtonClassName } from "../../../lib/ui";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 import { profileFormSchema, type ProfileFormValues } from "../schemas/profile.schema";
-import type { Gender, PrivacyLevel, ProfileResponse, UpdateProfilePayload } from "../types/profile.types";
-import { genderOptions, privacyOptions } from "../utils/profile-labels";
+import type { ActivityLevel, Gender, PrivacyLevel, ProfileResponse, UpdateProfilePayload } from "../types/profile.types";
+import { activityLevelOptions, genderOptions, privacyOptions } from "../utils/profile-labels";
 
 interface ProfileFormProps {
   profile: ProfileResponse;
@@ -21,10 +21,9 @@ function buildPayload(values: ProfileFormValues): UpdateProfilePayload {
     birthDate: values.birthDate,
     heightCm: Number(values.heightCm),
     currentWeightKg: Number(values.currentWeightKg),
+    activityLevel: values.activityLevel as ActivityLevel,
     privacyLevel: values.privacyLevel as PrivacyLevel,
   };
-  const bio = values.bio?.trim();
-  if (bio) payload.bio = bio;
   return payload;
 }
 
@@ -38,11 +37,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       fullName: profile.fullName ?? "",
-      bio: profile.bio ?? "",
       gender: profile.gender ?? "",
       birthDate: profile.birthDate ? profile.birthDate.slice(0, 10) : "",
       heightCm: profile.heightCm != null ? String(profile.heightCm) : "",
       currentWeightKg: profile.currentWeightKg != null ? String(profile.currentWeightKg) : "",
+      activityLevel: profile.activityLevel ?? "",
       privacyLevel: profile.privacyLevel ?? "FRIENDS",
     },
   });
@@ -61,10 +60,6 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormField label="Ad Soyad" htmlFor="fullName" error={errors.fullName?.message}>
           <input id="fullName" className={inputClassName} {...register("fullName")} />
-        </FormField>
-
-        <FormField label="Kısa açıklama" htmlFor="bio" error={errors.bio?.message}>
-          <input id="bio" className={inputClassName} {...register("bio")} />
         </FormField>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -91,6 +86,17 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             <input id="currentWeightKg" inputMode="decimal" className={inputClassName} {...register("currentWeightKg")} />
           </FormField>
         </div>
+
+        <FormField label="Aktivite seviyesi" htmlFor="activityLevel" error={errors.activityLevel?.message}>
+          <select id="activityLevel" className={inputClassName} {...register("activityLevel")}>
+            <option value="">Seçiniz</option>
+            {activityLevelOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </FormField>
 
         <FormField label="Gizlilik" htmlFor="privacyLevel" error={errors.privacyLevel?.message}>
           <select id="privacyLevel" className={inputClassName} {...register("privacyLevel")}>

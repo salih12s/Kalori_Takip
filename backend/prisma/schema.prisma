@@ -12,6 +12,14 @@ enum UserRole {
   ADMIN
 }
 
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  VERY_ACTIVE
+}
+
 enum GoalType {
   LOSE_WEIGHT
   MAINTAIN_WEIGHT
@@ -140,7 +148,7 @@ enum BadgeTriggerType {
 
 model User {
   id                   String             @id @default(uuid()) @db.Uuid
-  email                String             @unique
+  email                String?            @unique
   username             String             @unique
   passwordHash         String
   role                 UserRole           @default(USER)
@@ -154,6 +162,7 @@ model User {
   activityEntries      ActivityEntry[]
   workoutSessions      WorkoutSession[]
   waterLogs            WaterLog[]
+  measurementLogs      MeasurementLog[]
   following            Follow[]           @relation("Follower")
   followers            Follow[]           @relation("Following")
   leaderboardPoints    LeaderboardPoint[]
@@ -163,6 +172,23 @@ model User {
 
   @@index([email])
   @@index([username])
+}
+
+model MeasurementLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  date       DateTime @db.Date
+  weightKg   Decimal? @db.Decimal(5, 2)
+  neckCm     Decimal? @db.Decimal(5, 2)
+  waistCm    Decimal? @db.Decimal(5, 2)
+  shoulderCm Decimal? @db.Decimal(5, 2)
+  hipCm      Decimal? @db.Decimal(5, 2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }
 
 model Profile {
@@ -176,6 +202,7 @@ model Profile {
   currentWeightKg Decimal?     @db.Decimal(5, 2)
   birthDate       DateTime?    @db.Date
   goalType        GoalType?
+  activityLevel   ActivityLevel?
   privacyLevel    PrivacyLevel @default(FRIENDS)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -192,6 +219,7 @@ model UserGoal {
   dailyFatGoal      Int?
   dailyStepGoal     Int
   weeklyWorkoutGoal Int
+  dailyWaterGoal    Int?
   startingWeightKg  Decimal?  @db.Decimal(5, 2)
   targetWeightKg    Decimal?  @db.Decimal(5, 2)
   startsAt          DateTime  @default(now()) @db.Date
@@ -241,6 +269,7 @@ model Food {
   name             String
   normalizedName   String      @default("")
   brand            String?
+  imageUrl         String?
   barcode          String?
   servingSize      Decimal     @default(100) @db.Decimal(8, 2)
   servingUnit      String      @default("g")

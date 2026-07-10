@@ -12,9 +12,11 @@ import { GoalStepForm } from "../components/GoalStepForm";
 import { OnboardingProgress } from "../components/OnboardingProgress";
 import { ProfileStepForm } from "../components/ProfileStepForm";
 import { useOnboardingStatus } from "../hooks/useOnboarding";
+import type { ProfileResponse } from "../types/onboarding.types";
 
 export function OnboardingPage() {
   const [step, setStep] = useState<1 | 2>(1);
+  const [savedProfile, setSavedProfile] = useState<ProfileResponse | null>(null);
   const navigate = useNavigate();
   const status = useOnboardingStatus();
   const profileQuery = useQuery({
@@ -68,9 +70,19 @@ export function OnboardingPage() {
 
         <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
           {step === 1 ? (
-            <ProfileStepForm profile={profileQuery.data ?? null} onComplete={() => setStep(2)} />
+            <ProfileStepForm
+              profile={profileQuery.data ?? null}
+              onComplete={(profile) => {
+                setSavedProfile(profile);
+                setStep(2);
+              }}
+            />
           ) : (
-            <GoalStepForm onBack={() => setStep(1)} onComplete={finishOnboarding} />
+            <GoalStepForm
+              profile={savedProfile ?? profileQuery.data ?? null}
+              onBack={() => setStep(1)}
+              onComplete={finishOnboarding}
+            />
           )}
         </section>
       </div>

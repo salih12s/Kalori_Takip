@@ -21,11 +21,6 @@ export function GoalOverviewCard({ goal }: GoalOverviewCardProps) {
           <OverviewRow label="Hedef Tipi" value={goalTypeLabels[goal.goalType]} />
           <OverviewRow label="Günlük Kalori" value={`${goal.dailyCalorieGoal} kcal`} />
           <OverviewRow label="Protein" value={`${goal.dailyProteinGoal} g`} />
-          <OverviewRow
-            label="Karbonhidrat"
-            value={goal.dailyCarbGoal != null ? `${goal.dailyCarbGoal} g` : "—"}
-          />
-          <OverviewRow label="Yağ" value={goal.dailyFatGoal != null ? `${goal.dailyFatGoal} g` : "—"} />
           <OverviewRow label="Günlük Adım" value={`${goal.dailyStepGoal}`} />
           <OverviewRow label="Haftalık Spor" value={`${goal.weeklyWorkoutGoal}`} />
           <OverviewRow

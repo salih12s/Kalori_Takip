@@ -6,6 +6,7 @@ import { GoalOverviewCard } from "../components/GoalOverviewCard";
 import { ProfileForm } from "../components/ProfileForm";
 import { ProfileOverviewCard } from "../components/ProfileOverviewCard";
 import { ProfileSkeleton } from "../components/ProfileSkeleton";
+import { MeasurementHistoryCard } from "../components/MeasurementHistoryCard";
 import { useMyGoal } from "../hooks/useMyGoal";
 import { useMyProfile } from "../hooks/useMyProfile";
 
@@ -50,10 +51,11 @@ export function ProfilePage() {
       />
 
       <div className="grid gap-6 xl:grid-cols-2">
+        <MeasurementHistoryCard />
         <ProfileOverviewCard profile={profileQuery.data} />
         <GoalOverviewCard goal={goal} />
         <ProfileForm profile={profileQuery.data} />
-        <GoalForm goal={goal} />
+        <GoalForm goal={goal} profile={profileQuery.data} />
       </div>
     </PageShell>
   );

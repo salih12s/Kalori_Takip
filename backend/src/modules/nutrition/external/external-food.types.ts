@@ -4,6 +4,7 @@ export type ExternalFoodSearchResult = {
   externalId: string;
   provider: ExternalFoodProvider;
   name: string;
+  imageUrl?: string | null;
   servingSize: number;
   servingUnit: string;
   calories: number;

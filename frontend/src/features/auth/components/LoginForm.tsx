@@ -22,7 +22,7 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { username: "", password: "" },
   });
 
   const mutation = useMutation({
@@ -44,14 +44,14 @@ export function LoginForm() {
       onSubmit={handleSubmit((values) => mutation.mutate(values))}
       className="space-y-4"
     >
-      <FormField label="E-posta" htmlFor="email" error={errors.email?.message}>
+      <FormField label="Kullanıcı adı" htmlFor="username" error={errors.username?.message}>
         <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="ornek@eposta.com"
+          id="username"
+          type="text"
+          autoComplete="username"
+          placeholder="kullanici_adi"
           className={inputClassName}
-          {...register("email")}
+          {...register("username")}
         />
       </FormField>
 

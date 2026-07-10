@@ -13,6 +13,7 @@ export function toGoalResponse(goal: UserGoal): GoalResponse {
     dailyFatGoal: goal.dailyFatGoal,
     dailyStepGoal: goal.dailyStepGoal,
     weeklyWorkoutGoal: goal.weeklyWorkoutGoal,
+    dailyWaterGoal: goal.dailyWaterGoal,
     startingWeightKg: goal.startingWeightKg ? Number(goal.startingWeightKg) : null,
     targetWeightKg: goal.targetWeightKg ? Number(goal.targetWeightKg) : null,
     startsAt: goal.startsAt,

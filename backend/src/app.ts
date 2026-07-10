@@ -13,6 +13,7 @@ import { goalsRoutes } from "./modules/goals/goals.routes.js";
 import { leaderboardRoutes } from "./modules/leaderboard/leaderboard.routes.js";
 import { nutritionRoutes } from "./modules/nutrition/nutrition.routes.js";
 import { profilesRoutes } from "./modules/profiles/profiles.routes.js";
+import { measurementsRoutes } from "./modules/measurements/measurements.routes.js";
 import { socialRoutes } from "./modules/social/social.routes.js";
 import { healthRoutes } from "./modules/system/health.routes.js";
 
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profilesRoutes);
+app.use("/api/measurements", measurementsRoutes);
 app.use("/api/goals", goalsRoutes);
 app.use("/api", nutritionRoutes);
 app.use("/api/dashboard", dashboardRoutes);

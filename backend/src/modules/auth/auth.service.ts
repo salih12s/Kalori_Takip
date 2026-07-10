@@ -29,12 +29,6 @@ function createAuthResult(user: Awaited<ReturnType<typeof authRepository.findByI
 
 export const authService = {
   async register(input: RegisterInput): Promise<AuthResult> {
-    const existingEmailUser = await authRepository.findByEmail(input.email);
-
-    if (existingEmailUser) {
-      throw new AppError("Email is already in use", 409);
-    }
-
     const existingUsernameUser = await authRepository.findByUsername(input.username);
 
     if (existingUsernameUser) {
@@ -43,7 +37,6 @@ export const authService = {
 
     const passwordHash = await bcrypt.hash(input.password, passwordSaltRounds);
     const user = await authRepository.createUser({
-      email: input.email,
       username: input.username,
       passwordHash
     });
@@ -52,16 +45,16 @@ export const authService = {
   },
 
   async login(input: LoginInput): Promise<AuthResult> {
-    const user = await authRepository.findByEmail(input.email);
+    const user = await authRepository.findByUsername(input.username);
 
     if (!user) {
-      throw new AppError("Invalid email or password", 401);
+      throw new AppError("Invalid username or password", 401);
     }
 
     const passwordMatches = await bcrypt.compare(input.password, user.passwordHash);
 
     if (!passwordMatches) {
-      throw new AppError("Invalid email or password", 401);
+      throw new AppError("Invalid username or password", 401);
     }
 
     return createAuthResult(user);

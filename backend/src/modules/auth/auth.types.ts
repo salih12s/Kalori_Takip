@@ -9,7 +9,7 @@ export type LoginInput = z.infer<typeof loginSchema>;
 
 export type AuthUser = {
   id: string;
-  email: string;
+  email: string | null;
   username: string;
   role: UserRole;
   createdAt: Date;

@@ -6,6 +6,8 @@ type OpenFoodFactsProduct = {
   product_name_en?: string;
   generic_name?: string;
   brands?: string;
+  image_front_url?: string;
+  image_url?: string;
   serving_quantity?: string | number;
   serving_size?: string;
   nutriments?: Record<string, string | number | undefined>;
@@ -52,6 +54,7 @@ export function mapOpenFoodFactsProduct(product: OpenFoodFactsProduct): External
     externalId: `openfoodfacts:${code}`,
     provider: "OPEN_FOOD_FACTS",
     name,
+    imageUrl: product.image_front_url || product.image_url || null,
     servingSize: servingQuantity > 0 ? servingQuantity : 100,
     servingUnit: product.serving_size?.trim() || "g",
     calories: Math.round(calories),

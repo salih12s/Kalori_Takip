@@ -14,6 +14,7 @@ export function toProfileResponse(profile: Profile): ProfileResponse {
     currentWeightKg: profile.currentWeightKg ? Number(profile.currentWeightKg) : null,
     birthDate: profile.birthDate,
     goalType: profile.goalType,
+    activityLevel: profile.activityLevel,
     privacyLevel: profile.privacyLevel,
     createdAt: profile.createdAt,
     updatedAt: profile.updatedAt

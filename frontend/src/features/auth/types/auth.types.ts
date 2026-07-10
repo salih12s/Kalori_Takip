@@ -2,7 +2,7 @@ export type UserRole = "USER" | "ADMIN";
 
 export interface AuthUser {
   id: string;
-  email: string;
+  email: string | null;
   username: string;
   role: UserRole;
   createdAt: string;
@@ -15,12 +15,11 @@ export interface AuthResult {
 }
 
 export interface LoginPayload {
-  email: string;
+  username: string;
   password: string;
 }
 
 export interface RegisterPayload {
-  email: string;
   username: string;
   password: string;
 }

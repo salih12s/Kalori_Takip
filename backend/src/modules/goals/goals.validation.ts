@@ -17,6 +17,7 @@ export const createGoalSchema = z
     dailyFatGoal: positiveInt.min(10).max(300).optional(),
     dailyStepGoal: positiveInt.min(1000).max(50000),
     weeklyWorkoutGoal: positiveInt.max(14),
+    dailyWaterGoal: positiveInt.min(500).max(8000).optional(),
     startingWeightKg: weightKg.optional(),
     targetWeightKg: weightKg.optional(),
     startsAt: dateOnlySchema.optional(),

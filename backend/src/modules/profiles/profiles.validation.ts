@@ -1,5 +1,7 @@
-import { Gender, PrivacyLevel } from "@prisma/client";
+import { ActivityLevel, PrivacyLevel } from "@prisma/client";
 import { z } from "zod";
+
+const allowedGender = z.enum(["MALE", "FEMALE"]);
 
 const dateOnlySchema = z
   .string()
@@ -10,10 +12,11 @@ export const updateProfileSchema = z
   .object({
     fullName: z.string().trim().min(1).max(120).optional(),
     bio: z.string().trim().max(500).optional(),
-    gender: z.nativeEnum(Gender).optional(),
+    gender: allowedGender.optional(),
     birthDate: dateOnlySchema.optional(),
     heightCm: z.number().int().min(80).max(250).optional(),
     currentWeightKg: z.number().positive().min(20).max(400).optional(),
+    activityLevel: z.nativeEnum(ActivityLevel).optional(),
     privacyLevel: z.nativeEnum(PrivacyLevel).optional()
   })
   .strict();

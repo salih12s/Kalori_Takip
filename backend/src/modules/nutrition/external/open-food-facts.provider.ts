@@ -38,6 +38,7 @@ const searchFields = [
   "brands",
   "serving_quantity",
   "serving_size",
+  "image_front_url,image_url",
   "nutriments"
 ].join(",");
 

@@ -7,6 +7,7 @@ export interface FoodResponse {
   id: string;
   userId: string | null;
   name: string;
+  imageUrl: string | null;
   servingSize: number;
   servingUnit: string;
   calories: number;
@@ -28,6 +29,7 @@ export interface FoodSearchResult {
   externalId: string | null;
   provider: "OPEN_FOOD_FACTS" | null;
   name: string;
+  imageUrl: string | null;
   servingSize: number;
   servingUnit: string;
   calories: number;

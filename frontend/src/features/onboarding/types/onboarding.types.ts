@@ -1,6 +1,8 @@
-export type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
+export type Gender = "MALE" | "FEMALE";
 
 export type PrivacyLevel = "PUBLIC" | "FRIENDS" | "PRIVATE";
+
+export type ActivityLevel = "SEDENTARY" | "LIGHT" | "MODERATE" | "ACTIVE" | "VERY_ACTIVE";
 
 /** Backend GoalType enum (4 values — there is no BUILD_MUSCLE in the schema). */
 export type GoalType = "LOSE_WEIGHT" | "MAINTAIN_WEIGHT" | "GAIN_WEIGHT" | "IMPROVE_FITNESS";
@@ -16,6 +18,7 @@ export interface ProfileResponse {
   currentWeightKg: number | null;
   birthDate: string | null;
   goalType: string | null;
+  activityLevel: ActivityLevel | null;
   privacyLevel: PrivacyLevel;
   createdAt: string;
   updatedAt: string;
@@ -31,6 +34,7 @@ export interface GoalResponse {
   dailyFatGoal: number | null;
   dailyStepGoal: number;
   weeklyWorkoutGoal: number;
+  dailyWaterGoal: number | null;
   startingWeightKg: number | null;
   targetWeightKg: number | null;
   startsAt: string;
@@ -42,11 +46,11 @@ export interface GoalResponse {
 
 export interface UpdateProfilePayload {
   fullName?: string;
-  bio?: string;
   gender?: Gender;
   birthDate?: string;
   heightCm?: number;
   currentWeightKg?: number;
+  activityLevel?: ActivityLevel;
   privacyLevel?: PrivacyLevel;
 }
 
@@ -58,5 +62,6 @@ export interface CreateGoalPayload {
   dailyFatGoal?: number;
   dailyStepGoal: number;
   weeklyWorkoutGoal: number;
+  dailyWaterGoal?: number;
   targetWeightKg?: number;
 }

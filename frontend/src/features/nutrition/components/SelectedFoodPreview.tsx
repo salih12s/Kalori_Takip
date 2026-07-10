@@ -41,7 +41,7 @@ export function SelectedFoodPreview({ food, quantity, unit }: SelectedFoodPrevie
       <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Seçilen Yemek</p>
       <div className="mt-2 flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white text-xl">
-          {getFoodEmoji(food.name)}
+          {food.imageUrl ? <img src={food.imageUrl} alt="" className="h-10 w-10 rounded-lg object-cover" /> : getFoodEmoji(food.name)}
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-stone-900">{food.name}</h3>

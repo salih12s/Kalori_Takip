@@ -24,9 +24,11 @@ export function FoodResultCard({ food, onSelect }: FoodResultCardProps) {
       className="rounded-lg border border-stone-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-50 text-xl">
-          {getFoodEmoji(food.name)}
-        </span>
+        {food.imageUrl ? (
+          <img src={food.imageUrl} alt="" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+        ) : (
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-50 text-xl">{getFoodEmoji(food.name)}</span>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="min-w-0 text-sm font-semibold text-stone-900">{food.name}</h4>

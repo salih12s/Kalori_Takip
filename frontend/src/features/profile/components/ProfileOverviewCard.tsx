@@ -38,13 +38,6 @@ export function ProfileOverviewCard({ profile }: ProfileOverviewCardProps) {
           </div>
         ))}
       </dl>
-
-      <div>
-        <p className="text-sm text-stone-500">Kısa açıklama</p>
-        <p className="mt-1 text-sm font-medium text-stone-800">
-          {profile.bio?.trim() ? profile.bio : "Henüz bir açıklama eklemedin."}
-        </p>
-      </div>
     </section>
   );
 }

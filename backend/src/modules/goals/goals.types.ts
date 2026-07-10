@@ -17,6 +17,7 @@ export type GoalResponse = {
   dailyFatGoal: number | null;
   dailyStepGoal: number;
   weeklyWorkoutGoal: number;
+  dailyWaterGoal: number | null;
   startingWeightKg: number | null;
   targetWeightKg: number | null;
   startsAt: Date;

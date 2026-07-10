@@ -14,7 +14,6 @@ export function RegisterPage() {
     >
       <div className="space-y-1 text-center">
         <h1 className="text-xl font-bold text-stone-900">Kayıt Ol</h1>
-        <p className="text-sm text-stone-500">Birkaç adımda hesabını oluştur ve takibe başla.</p>
       </div>
 
       <RegisterForm />

@@ -35,8 +35,8 @@ export function LeaderboardPage() {
 
       <MyLeaderboardSummary />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
+        <div className="min-w-0 space-y-4">
           <LeaderboardTabs active={tab} onChange={setTab} />
 
           {activeQuery.isLoading ? (

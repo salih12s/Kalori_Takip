@@ -9,6 +9,7 @@ export type CuratedFoodSeed = {
   fat: number;
   fiber: number;
   sugar: number;
+  imageUrl?: string;
 };
 
 export const curatedFoods: CuratedFoodSeed[] = [

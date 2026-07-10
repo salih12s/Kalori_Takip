@@ -21,14 +21,13 @@ export function RegisterForm() {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { username: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: { username: "", password: "", confirmPassword: "" },
   });
 
   const mutation = useMutation({
     mutationFn: (values: RegisterFormValues) =>
       registerUser({
         username: values.username.trim(),
-        email: values.email,
         password: values.password,
       }),
     onSuccess: () => {
@@ -52,17 +51,6 @@ export function RegisterForm() {
           placeholder="kullanici_adi"
           className={inputClassName}
           {...register("username")}
-        />
-      </FormField>
-
-      <FormField label="E-posta" htmlFor="email" error={errors.email?.message}>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="ornek@eposta.com"
-          className={inputClassName}
-          {...register("email")}
         />
       </FormField>
 

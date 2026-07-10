@@ -38,8 +38,7 @@ export const api = {
 
 /** Maps known backend (English) messages to Turkish user-facing copy. */
 const errorMessageMap: Record<string, string> = {
-  "Invalid email or password": "E-posta veya şifre hatalı.",
-  "Email is already in use": "Bu e-posta zaten kullanılıyor.",
+  "Invalid username or password": "Kullanıcı adı veya şifre hatalı.",
   "Username is already in use": "Bu kullanıcı adı zaten kullanılıyor.",
   "User not found": "Kullanıcı bulunamadı.",
 };

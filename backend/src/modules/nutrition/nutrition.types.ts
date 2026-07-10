@@ -22,6 +22,7 @@ export type FoodSearchResultResponse = {
   externalId: string | null;
   provider: "OPEN_FOOD_FACTS" | null;
   name: string;
+  imageUrl: string | null;
   servingSize: number;
   servingUnit: string;
   calories: number;
@@ -44,6 +45,7 @@ export type FoodResponse = {
   id: string;
   userId: string | null;
   name: string;
+  imageUrl: string | null;
   servingSize: number;
   servingUnit: string;
   calories: number;
