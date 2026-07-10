@@ -6,10 +6,12 @@ import { curatedFoods } from "./curated-foods.js";
 const prisma = new PrismaClient();
 
 const imageCache = new Map<string, string | null>();
+const shouldFetchImages = process.env.SEED_FETCH_IMAGES === "true";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function resolveCommonsImage(food: (typeof curatedFoods)[number]): Promise<string | null> {
+  if (!shouldFetchImages) return null;
   const knownImages: Record<string, string> = {
     oats: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Avena_sativa_L.jpg/330px-Avena_sativa_L.jpg",
     oatmeal: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Oatmeal_with_blueberries.jpg/330px-Oatmeal_with_blueberries.jpg"
